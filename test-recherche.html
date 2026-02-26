@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Recherche - Mokpokpo</title>
+    <link rel="stylesheet" href="css/css_bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .test-section {
+            padding: 2rem;
+            margin: 2rem 0;
+            background: #f8f9fa;
+            border-radius: 1rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        .test-result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 0.5rem;
+        }
+        .test-step {
+            padding: 0.5rem 1rem;
+            margin: 0.5rem 0;
+            background: white;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .test-step svg {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <div class="brand-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                    </svg>
+                </div>
+                Mokpokpo - Test Recherche
+            </a>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">Test des Fonctionnalités de Recherche</h1>
+            <p class="lead text-muted">Guide interactif pour tester la recherche et le filtrage</p>
+        </div>
+
+        <!-- Test 1: Recherche Simple -->
+        <div class="test-section">
+            <h2 class="h3 fw-bold mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                Test 1 : Recherche Simple
+            </h2>
+            <p class="text-muted mb-3">Testez la recherche par nom de produit</p>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Allez sur la page <a href="products.html" class="text-primary fw-bold">Catalogue</a></span>
+            </div>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Tapez "basilic" dans la barre de recherche</span>
+            </div>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Attendez 300ms ? Les résultats apparaissent automatiquement</span>
+            </div>
+            
+            <div class="test-result">
+                <strong>Résultat Attendu :</strong> Tous les produits contenant "basilic" s'affichent
+            </div>
+        </div>
+
+        <!-- Test 2: Filtrage par Catégorie -->
+        <div class="test-section">
+            <h2 class="h3 fw-bold mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                    <polyline points="2 17 12 22 22 17"></polyline>
+                    <polyline points="2 12 12 17 22 12"></polyline>
+                </svg>
+                Test 2 : Filtrage par Catégorie
+            </h2>
+            <p class="text-muted mb-3">Testez le filtre par catégorie</p>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Sélectionnez "Plantes Médicinales" dans le filtre</span>
+            </div>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Observez le feedback visuel (bordure verte)</span>
+            </div>
+            
+            <div class="test-result">
+                <strong>Résultat Attendu :</strong> Seules les plantes médicinales s'affichent avec badges verts
+            </div>
+        </div>
+
+        <!-- Test 3: Tri -->
+        <div class="test-section">
+            <h2 class="h3 fw-bold mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <line x1="12" y1="2" x2="12" y2="22"></line>
+                    <path d="m19 15-7 7-7-7"></path>
+                    <path d="m19 9-7-7-7 7"></path>
+                </svg>
+                Test 3 : Tri des Produits
+            </h2>
+            <p class="text-muted mb-3">Testez les différentes options de tri</p>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Sélectionnez "Prix croissant"</span>
+            </div>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Vérifiez que les prix sont triés du plus petit au plus grand</span>
+            </div>
+            
+            <div class="test-result">
+                <strong>Résultat Attendu :</strong> Les produits sont triés par prix croissant
+            </div>
+        </div>
+
+        <!-- Test 4: Combinaison -->
+        <div class="test-section">
+            <h2 class="h3 fw-bold mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                Test 4 : Combinaison de Filtres
+            </h2>
+            <p class="text-muted mb-3">Testez la recherche + catégorie + tri</p>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Recherche : "plante"</span>
+            </div>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Catégorie : "Herbes Aromatiques"</span>
+            </div>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Tri : "Nom A-Z"</span>
+            </div>
+            
+            <div class="test-result">
+                <strong>Résultat Attendu :</strong> Herbes aromatiques contenant "plante", triées alphabétiquement
+            </div>
+        </div>
+
+        <!-- Test 5: Raccourci Clavier -->
+        <div class="test-section">
+            <h2 class="h3 fw-bold mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+                    <path d="M6 8h.01"></path>
+                    <path d="M10 8h.01"></path>
+                    <path d="M14 8h.01"></path>
+                    <path d="M18 8h.01"></path>
+                    <path d="M8 12h.01"></path>
+                    <path d="M12 12h.01"></path>
+                    <path d="M16 12h.01"></path>
+                    <path d="M7 16h10"></path>
+                </svg>
+                Test 5 : Raccourci Clavier
+            </h2>
+            <p class="text-muted mb-3">Testez la touche Échap pour effacer</p>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Tapez quelque chose dans la recherche</span>
+            </div>
+            
+            <div class="test-step">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Appuyez sur la touche "Échap"</span>
+            </div>
+            
+            <div class="test-result">
+                <strong>Résultat Attendu :</strong> La recherche est effacée et tous les produits réapparaissent
+            </div>
+        </div>
+
+        <!-- Console Logs -->
+        <div class="test-section bg-dark text-white">
+            <h2 class="h3 fw-bold mb-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <polyline points="4 17 10 11 4 5"></polyline>
+                    <line x1="12" y1="19" x2="20" y2="19"></line>
+                </svg>
+                Console de Débogage
+            </h2>
+            <p class="mb-3 opacity-75">Ouvrez la console (F12) pour voir les logs de debug :</p>
+            
+            <div class="bg-black p-3 rounded font-monospace small">
+                <div class="text-success">? Filtered: 12 of 45 products</div>
+                <div class="text-info">? Search term: "basilic"</div>
+                <div class="text-warning">? Category: Herbes Aromatiques</div>
+                <div class="text-primary">? Sort by: price-asc</div>
+            </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="text-center mt-5">
+            <a href="products.html" class="btn btn-primary btn-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                Tester Maintenant
+            </a>
+        </div>
+
+        <!-- Documentation Link -->
+        <div class="text-center mt-4">
+            <a href="GUIDE-RECHERCHE-FILTRAGE.md" class="text-muted text-decoration-none">
+                ?? Voir la documentation complète
+            </a>
+        </div>
+    </div>
+
+    <footer class="mt-5 py-4 bg-light text-center text-muted">
+        <p class="mb-0">© 2025 Mokpokpo - Test des Fonctionnalités de Recherche</p>
+    </footer>
+
+    <script src="js/js_bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

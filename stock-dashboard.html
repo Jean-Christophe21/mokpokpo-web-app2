@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Gestionnaire de Stock - Mokpokpo</title>
+    <link rel="stylesheet" href="css/css_bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <div class="brand-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z"/>
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                    </svg>
+                </div>
+                Mokpokpo - Stock
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Accueil</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-2">
+                    <div id="user-links" class="d-flex gap-2 align-items-center">
+                        <a href="#" class="d-flex align-items-center gap-2 bg-light px-3 py-2 rounded-pill text-decoration-none">
+                            <div class="user-avatar">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                            </div>
+                            <span class="text-muted small" id="userNameDisplay">Gestionnaire</span>
+                        </a>
+                        <button onclick="logout()" class="btn btn-outline-danger btn-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            Déconnexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <section class="dashboard-header py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="user-avatar-header" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="display-5 fw-bold mb-1">Espace Gestionnaire de Stock</h1>
+                            <p class="lead text-muted mb-0">Gestion des stocks et inventaire</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Content -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-3">
+                    <div class="dashboard-sidebar sticky-top" style="top: 100px; z-index: 1000;">
+                        <div class="list-group list-group-flush shadow-sm rounded-4 overflow-hidden">
+                            <a href="#overview" class="list-group-item list-group-item-action active border-0 py-3" data-section="overview">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #3b82f6;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Vue d'ensemble</div>
+                                        <small class="text-muted">Tableau de bord</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#stocks" class="list-group-item list-group-item-action border-0 py-3" data-section="stocks">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #10b981;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Niveaux de Stock</div>
+                                        <small class="text-muted">Consulter les stocks</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#harvest" class="list-group-item list-group-item-action border-0 py-3" data-section="harvest">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #f59e0b;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z"/>
+                                            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Enregistrer Récolte</div>
+                                        <small class="text-muted">Nouvelle récolte</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#movements" class="list-group-item list-group-item-action border-0 py-3" data-section="movements">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #e9d5ff, #d8b4fe); color: #a855f7;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                            <polyline points="17 6 23 6 23 12"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Mouvements</div>
+                                        <small class="text-muted">Entrées/Sorties</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#alerts" class="list-group-item list-group-item-action border-0 py-3" data-section="alerts">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #fecdd3, #fda4af); color: #f43f5e;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">Alertes Stock</div>
+                                            <small class="text-muted">Seuils bas</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill" id="alertsBadge">0</span>
+                                </div>
+                            </a>
+                            <a href="#predictions" class="list-group-item list-group-item-action border-0 py-3" data-section="predictions">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #ddd6fe, #c4b5fd); color: #8b5cf6;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                            <polyline points="17 6 23 6 23 12"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Donnees Historiques</div>
+                                        <small class="text-muted">IA & Analytics</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-9">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="dashboard-section">
+                        <div class="row g-4 mb-4">
+                            <!-- Stats Cards -->
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #10b981;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #10b981;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Produits en Stock</p>
+                                        <h3 class="stat-card-value" id="totalStockedProducts">0</h3>
+                                        <p class="stat-card-description">Références actives</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #f59e0b;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #f59e0b;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                                            <polyline points="19 12 12 19 5 12"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Entrées (Mois)</p>
+                                        <h3 class="stat-card-value" id="monthlyEntries">0</h3>
+                                        <p class="stat-card-description">Ce mois-ci</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #a855f7;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #e9d5ff, #d8b4fe); color: #a855f7;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="19" x2="12" y2="5"></line>
+                                            <polyline points="5 12 12 5 19 12"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Sorties (Mois)</p>
+                                        <h3 class="stat-card-value" id="monthlyExits">0</h3>
+                                        <p class="stat-card-description">Ce mois-ci</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #f43f5e;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #fecdd3, #fda4af); color: #f43f5e;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Alertes</p>
+                                        <h3 class="stat-card-value" id="totalAlerts">0</h3>
+                                        <p class="stat-card-description">Stock bas</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-header bg-transparent border-0 py-4">
+                                <h5 class="fw-bold mb-0">Actions Rapides</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-primary w-100 py-3" onclick="document.querySelector('[data-section=harvest]').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
+                                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            </svg>
+                                            <div class="fw-semibold">Enregistrer Récolte</div>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-success w-100 py-3" onclick="document.querySelector('[data-section=stocks]').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
+                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                            </svg>
+                                            <div class="fw-semibold">Consulter Stocks</div>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-outline-danger w-100 py-3" onclick="document.querySelector('[data-section=alerts]').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
+                                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                            </svg>
+                                            <div class="fw-semibold">Voir Alertes</div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stocks Section -->
+                    <div id="stocks-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">Niveaux de Stock</h5>
+                                    <button class="btn btn-primary btn-sm" onclick="loadStocks()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                            <polyline points="23 4 23 10 17 10"></polyline>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                        </svg>
+                                        Actualiser
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="stocksList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Harvest Section -->
+                    <div id="harvest-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="fw-bold mb-0">Enregistrer une Récolte</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="harvestForm">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Produit</label>
+                                            <select class="form-select" id="harvestProduct" required>
+                                                <option value="">Sélectionner un produit...</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold">Quantité</label>
+                                            <input type="number" class="form-control" id="harvestQuantity" min="1" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold">Type de mouvement</label>
+                                            <select class="form-select" id="movementType" required>
+                                                <option value="ENTREE">Entrée (Récolte/Achat)</option>
+                                                <option value="SORTIE">Sortie (Vente/Perte)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <button type="submit" class="btn btn-primary">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                                                    <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                                                    <polyline points="7 3 7 8 15 8"></polyline>
+                                                </svg>
+                                                Enregistrer
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Movements Section -->
+                    <div id="movements-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">Historique des Mouvements</h5>
+                                    <button class="btn btn-primary btn-sm" onclick="loadMovements()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                            <polyline points="23 4 23 10 17 10"></polyline>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                        </svg>
+                                        Actualiser
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="movementsList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts Section -->
+                    <div id="alerts-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="fw-bold mb-0">Alertes Stock Bas</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="alertsList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Predictions Section -->
+                    <div id="predictions-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                        </svg>
+                                        Donnees Historiques (IA)
+                                    </h5>
+                                    <button class="btn btn-primary btn-sm" onclick="loadHistoricalData()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                            <polyline points="23 4 23 10 17 10"></polyline>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                        </svg>
+                                        Actualiser
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="historicalDataList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-lg-start mt-5">
+        <div class="container py-5">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z"/>
+                                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                            </svg>
+                        </div>
+                        <span class="fw-bold fs-5">Mokpokpo</span>
+                    </div>
+                    <p class="text-muted mb-3">Gestion des stocks de plantes et produits agricoles naturels.</p>
+                </div>
+            </div>
+        </div>
+        <div class="border-top">
+            <div class="container py-3">
+                <p class="text-center text-muted mb-0">@ 2025 Mokpokpo. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/js_bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/stock-dashboard.js"></script>
+    <script>
+        // Check access on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkPageAccess('GEST_STOCK');
+        });
+        
+        // Prevent caching for this page
+        window.addEventListener('beforeunload', function() {
+            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+                window.location.reload();
+            }
+        });
+        
+        // Disable back button functionality
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+    </script>
+</body>
+</html>

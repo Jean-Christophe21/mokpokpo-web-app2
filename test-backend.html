@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Backend - Mokpokpo</title>
+    <link rel="stylesheet" href="css/css_bootstrap/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-success { background: #10b981; }
+        .status-error { background: #ef4444; }
+        .status-pending { background: #f59e0b; }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .btn-test {
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">?? Test Backend Mokpokpo</h1>
+        
+        <!-- Backend Status -->
+        <div class="test-card">
+            <h3>1. État du Backend</h3>
+            <p class="text-muted">Vérifier si le backend est accessible</p>
+            <button class="btn btn-primary btn-test" onclick="testBackendStatus()">Tester</button>
+            <div id="backendStatus"></div>
+        </div>
+
+        <!-- Login Endpoint -->
+        <div class="test-card">
+            <h3>2. Endpoint /auth/login</h3>
+            <p class="text-muted">Tester l'endpoint de connexion</p>
+            <div class="mb-3">
+                <label>Email:</label>
+                <input type="email" class="form-control" id="testEmail" value="test@example.com">
+            </div>
+            <div class="mb-3">
+                <label>Password:</label>
+                <input type="password" class="form-control" id="testPassword" value="password123">
+            </div>
+            <button class="btn btn-primary btn-test" onclick="testLogin()">Tester Connexion</button>
+            <div id="loginStatus"></div>
+        </div>
+
+        <!-- Products Endpoint -->
+        <div class="test-card">
+            <h3>3. Endpoint /produits</h3>
+            <p class="text-muted">Tester le chargement des produits</p>
+            <button class="btn btn-primary btn-test" onclick="testProducts()">Tester</button>
+            <div id="productsStatus"></div>
+        </div>
+
+        <!-- API Documentation -->
+        <div class="test-card">
+            <h3>4. Documentation API</h3>
+            <p class="text-muted">Accéder à la documentation Swagger</p>
+            <a href="https://bd-mokpokokpo.onrender.com/docs" target="_blank" class="btn btn-info btn-test">Ouvrir /docs</a>
+        </div>
+
+        <!-- Console Logs -->
+        <div class="test-card">
+            <h3>?? Console de Tests</h3>
+            <pre id="console"></pre>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://bd-mokpokokpo.onrender.com';
+        const consoleDiv = document.getElementById('console');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6';
+            consoleDiv.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        }
+
+        async function testBackendStatus() {
+            const statusDiv = document.getElementById('backendStatus');
+            statusDiv.innerHTML = '<span class="status-indicator status-pending"></span>Test en cours...';
+            log('Testing backend status...');
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_URL}/`);
+                const duration = Date.now() - startTime;
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success mt-3">
+                            <span class="status-indicator status-success"></span>
+                            <strong>? Backend Actif</strong><br>
+                            <small>Temps de réponse: ${duration}ms</small><br>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    log(`? Backend actif (${duration}ms)`, 'success');
+                } else {
+                    throw new Error(`Status ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-danger mt-3">
+                        <span class="status-indicator status-error"></span>
+                        <strong>? Backend Inaccessible</strong><br>
+                        <small>${error.message}</small><br>
+                        <small>Le backend peut être en cours de démarrage (cold start).<br>
+                        Attendez 30 secondes et réessayez.</small>
+                    </div>
+                `;
+                log(`? Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            const statusDiv = document.getElementById('loginStatus');
+            const email = document.getElementById('testEmail').value;
+            const password = document.getElementById('testPassword').value;
+
+            statusDiv.innerHTML = '<span class="status-indicator status-pending"></span>Test en cours...';
+            log(`Testing login with ${email}...`);
+
+            const formData = new URLSearchParams();
+            formData.append('username', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success mt-3">
+                            <span class="status-indicator status-success"></span>
+                            <strong>? Connexion Réussie</strong><br>
+                            <small>Token reçu</small>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    log('? Connexion réussie', 'success');
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-warning mt-3">
+                            <span class="status-indicator status-error"></span>
+                            <strong>?? Échec de Connexion</strong><br>
+                            <small>Status: ${response.status}</small>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    log(`?? Échec (${response.status}): ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-danger mt-3">
+                        <span class="status-indicator status-error"></span>
+                        <strong>? Erreur Réseau</strong><br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+                log(`? Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProducts() {
+            const statusDiv = document.getElementById('productsStatus');
+            statusDiv.innerHTML = '<span class="status-indicator status-pending"></span>Test en cours...';
+            log('Testing products endpoint...');
+
+            try {
+                const response = await fetch(`${API_URL}/produits`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    statusDiv.innerHTML = `
+                        <div class="alert alert-success mt-3">
+                            <span class="status-indicator status-success"></span>
+                            <strong>? Produits Chargés</strong><br>
+                            <small>${data.length} produit(s) trouvé(s)</small>
+                            <pre>${JSON.stringify(data.slice(0, 2), null, 2)}...</pre>
+                        </div>
+                    `;
+                    log(`? ${data.length} produits chargés`, 'success');
+                } else {
+                    throw new Error(`Status ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="alert alert-danger mt-3">
+                        <span class="status-indicator status-error"></span>
+                        <strong>? Erreur Chargement</strong><br>
+                        <small>${error.message}</small>
+                    </div>
+                `;
+                log(`? Erreur: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('=== Test Suite Démarré ===');
+            log(`Backend URL: ${API_URL}`);
+            log('Cliquez sur les boutons pour tester chaque fonctionnalité');
+        });
+    </script>
+</body>
+</html>

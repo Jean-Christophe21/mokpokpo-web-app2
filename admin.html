@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administration - Mokpokpo</title>
+    <link rel="stylesheet" href="css/css_bootstrap/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-dark sticky-top">
+        <div class="container">
+             <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+                <div class="bg-primary rounded p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+                </div>
+                Mokpokpo Admin
+            </a>
+            <div class="d-flex">
+                 <button class="btn btn-outline-light btn-sm" onclick="window.location.href='index.html'">Déconnexion</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Dashboard Header -->
+    <section class="dashboard-header py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="user-avatar-header" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 5a3 3 0 1 1-3 3 3 3 0 0 1 3-3zm0 13a8 8 0 0 1-6-2.7A6 6 0 0 1 12 14a6 6 0 0 1 6 3.3A8 8 0 0 1 12 20z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="display-5 fw-bold mb-1">Espace Administrateur</h1>
+                            <p class="lead text-muted mb-0">Gestion complète de la plateforme</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard Content -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4">
+                <!-- Sidebar -->
+                <div class="col-lg-3">
+                    <div class="dashboard-sidebar sticky-top" style="top: 100px; z-index: 1000;">
+                        <div class="list-group list-group-flush shadow-sm rounded-4 overflow-hidden">
+                            <a href="#overview" class="list-group-item list-group-item-action active border-0 py-3" data-section="overview">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #3b82f6;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Vue d'ensemble</div>
+                                        <small class="text-muted">Dashboard</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#users" class="list-group-item list-group-item-action border-0 py-3" data-section="users">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #f59e0b;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Utilisateurs</div>
+                                        <small class="text-muted">Gestion des rôles</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#products" class="list-group-item list-group-item-action border-0 py-3" data-section="products">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #10b981;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z"/>
+                                            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Produits</div>
+                                        <small class="text-muted">Catalogue</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#stocks" class="list-group-item list-group-item-action border-0 py-3" data-section="stocks">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #e9d5ff, #d8b4fe); color: #a855f7;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Stocks</div>
+                                        <small class="text-muted">Inventaire</small>
+                                    </div>
+                                </div>
+                            </a>
+                            <a href="#orders" class="list-group-item list-group-item-action border-0 py-3" data-section="orders">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #fecdd3, #fda4af); color: #f43f5e;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                                <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">Commandes</div>
+                                            <small class="text-muted">Toutes</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill" id="ordersBadge">0</span>
+                                </div>
+                            </a>
+                            <a href="#alerts" class="list-group-item list-group-item-action border-0 py-3" data-section="alerts">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center">
+                                        <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626;">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold">Alertes Stock</div>
+                                            <small class="text-muted">Critiques</small>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill" id="alertsBadge">0</span>
+                                </div>
+                            </a>
+                            <a href="#predictions" class="list-group-item list-group-item-action border-0 py-3" data-section="predictions">
+                                <div class="d-flex align-items-center">
+                                    <div class="sidebar-icon me-3" style="background: linear-gradient(135deg, #ddd6fe, #c4b5fd); color: #8b5cf6;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                                            <polyline points="17 6 23 6 23 12"></polyline>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Prédictions</div>
+                                        <small class="text-muted">IA & Analytics</small>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-9">
+                    <!-- Overview Section -->
+                    <div id="overview-section" class="dashboard-section">
+                        <div class="row g-4 mb-4">
+                            <!-- Stats Cards -->
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #3b82f6;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #3b82f6;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                            <circle cx="9" cy="7" r="4"></circle>
+                                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Utilisateurs</p>
+                                        <h3 class="stat-card-value" id="totalUsers">0</h3>
+                                        <p class="stat-card-description">Total inscrit</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #10b981;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #10b981;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z"/>
+                                            <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Produits</p>
+                                        <h3 class="stat-card-value" id="totalProducts">0</h3>
+                                        <p class="stat-card-description">Au catalogue</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #f43f5e;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #fecdd3, #fda4af); color: #f43f5e;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                            <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">Commandes</p>
+                                        <h3 class="stat-card-value" id="totalOrders">0</h3>
+                                        <p class="stat-card-description">Total</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stat-card" style="border-top: 4px solid #f59e0b;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #f59e0b;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <line x1="12" y1="1" x2="12" y2="23"></line>
+                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="stat-card-content">
+                                        <p class="stat-card-label">CA Total</p>
+                                        <h3 class="stat-card-value"><span id="totalRevenue">0</span> FCFA</h3>
+                                        <p class="stat-card-description">Ventes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card border-0 shadow-sm rounded-4 mb-4">
+                            <div class="card-header bg-transparent border-0 py-4">
+                                <h5 class="fw-bold mb-0">Actions Rapides</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-primary w-100 py-3" onclick="document.querySelector('[data-section=products]').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
+                                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            </svg>
+                                            <div class="fw-semibold">Nouveau Produit</div>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-success w-100 py-3" onclick="document.querySelector('[data-section=users]').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                <circle cx="8.5" cy="7" r="4"></circle>
+                                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                                            </svg>
+                                            <div class="fw-semibold">Gérer Utilisateurs</div>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-warning w-100 py-3" onclick="document.querySelector('[data-section=stocks]').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
+                                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                            </svg>
+                                            <div class="fw-semibold">Gérer Stocks</div>
+                                        </button>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button class="btn btn-outline-danger w-100 py-3" onclick="document.querySelector('[data-section=alerts]').click()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-2">
+                                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                            </svg>
+                                            <div class="fw-semibold">Voir Alertes</div>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-transparent border-0 py-4">
+                                <h5 class="fw-bold mb-0">Activités Récentes</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="recentActivity">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Users Section -->
+                    <div id="users-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">Gestion des Utilisateurs</h5>
+                                    <button class="btn btn-primary btn-sm" onclick="loadUsers()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                            <polyline points="23 4 23 10 17 10"></polyline>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                        </svg>
+                                        Actualiser
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="usersList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Section -->
+                    <div id="products-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">Gestion des Produits</h5>
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-primary btn-sm" onclick="showAddProductModal()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                            </svg>
+                                            Ajouter
+                                        </button>
+                                        <button class="btn btn-outline-primary btn-sm" onclick="loadProducts()">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                <polyline points="23 4 23 10 17 10"></polyline>
+                                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                            </svg>
+                                            Actualiser
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="productsList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stocks Section -->
+                    <div id="stocks-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">Gestion des Stocks</h5>
+                                    <button class="btn btn-primary btn-sm" onclick="loadStocks()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                            <polyline points="23 4 23 10 17 10"></polyline>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                        </svg>
+                                        Actualiser
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="stocksList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Section -->
+                    <div id="orders-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">Gestion des Commandes</h5>
+                                    <button class="btn btn-primary btn-sm" onclick="loadOrders()">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                            <polyline points="23 4 23 10 17 10"></polyline>
+                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                        </svg>
+                                        Actualiser
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="ordersList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts Section -->
+                    <div id="alerts-section" class="dashboard-section d-none">
+                        <div class="card border-0 shadow-sm rounded-4">
+                            <div class="card-header bg-white py-3">
+                                <h5 class="fw-bold mb-0">Alertes Stock Critiques</h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="alertsList">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Chargement...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Predictions Section -->
+                    <div id="predictions-section" class="dashboard-section d-none">
+                        <div class="row g-4">
+                            <!-- Sales Predictions -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm rounded-4">
+                                    <div class="card-header bg-white py-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="fw-bold mb-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                </svg>
+                                                Prédictions des Ventes
+                                            </h5>
+                                            <button class="btn btn-primary btn-sm" onclick="loadSalesPredictions()">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                                </svg>
+                                                Actualiser
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="salesPredictionsList">
+                                            <div class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Chargement...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Historical Data -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm rounded-4">
+                                    <div class="card-header bg-white py-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="fw-bold mb-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                                </svg>
+                                                Données Historiques
+                                            </h5>
+                                            <button class="btn btn-primary btn-sm" onclick="loadHistoricalData()">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                                </svg>
+                                                Actualiser
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="historicalDataList">
+                                            <div class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Chargement...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center text-lg-start mt-5">
+        <div class="container py-5">
+            <div class="row g-4">
+                <!-- Brand Section -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="brand-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z"/>
+                                <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                            </svg>
+                        </div>
+                        <span class="fw-bold fs-5">Mokpokpo</span>
+                    </div>
+                    <p class="text-muted mb-3">Votre partenaire de confiance pour des plantes et produits agricoles naturels de qualité au Togo.</p>
+                    <div class="d-flex gap-2">
+                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M7.55 2h8.9C19.4 2 22 4.6 22 7.55v8.9C22 19.4 19.4 22 16.45 22h-8.9C4.6 22 2 19.4 2 16.45v-8.9C2 4.6 4.6 2 7.55 2zm0 1.5C5.466 3.5 3.5 5.466 3.5 7.55v8.9c0 2.084 1.966 4.05 4.05 4.05h8.9c2.084 0 4.05-1.966 4.05-4.05v-8.9c0-2.084-1.966-4.05-4.05-4.05h-8.9zM12 6.5a5.5 5.5 0 110 11 5.5 5.5 0 010-11zm0 1.5a4 4 0 100 8 4 4 0 000-8zm5.75-2.25a1 1 0 110 2 1 1 0 010-2z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="btn btn-outline-secondary btn-sm rounded-circle" style="width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Navigation -->
+                <div class="col-lg-2 col-md-6">
+                    <h5 class="fw-bold mb-3">Navigation</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="index.html" class="text-decoration-none text-muted">Accueil</a></li>
+                        <li class="mb-2"><a href="products.html" class="text-decoration-none text-muted">Catalogue</a></li>
+                        <li class="mb-2"><a href="about.html" class="text-decoration-none text-muted">À propos</a></li>
+                        <li class="mb-2"><a href="contact.html" class="text-decoration-none text-muted">Contact</a></li>
+                    </ul>
+                </div>
+
+                <!-- Categories -->
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="fw-bold mb-3">Catégories</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Plantes Médicinales</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Herbes Aromatiques</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Superaliments</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-muted">Épices</a></li>
+                    </ul>
+                </div>
+
+                <!-- Contact -->
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="fw-bold mb-3">Contact</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-success me-2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            <span class="text-muted">Lomé, Togo</span>
+                        </li>
+                        <li class="mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-success me-2">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                            <span class="text-muted">+229 XX XX XX XX</span>
+                        </li>
+                        <li class="mb-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-success me-2">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            <span class="text-muted">contact@mokpokpo.tg</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Copyright -->
+        <div class="border-top">
+            <div class="container py-3">
+                <p class="text-center text-muted mb-0">© 2025 Mokpokpo. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/js_bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/script.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+    <script>
+        // Wait for page to fully load and storage to be ready
+        window.addEventListener('load', () => {
+            console.log('🔍 Admin page loaded, checking access...');
+            console.log('SessionStorage token:', sessionStorage.getItem('token') ? 'Present' : 'Missing');
+            console.log('SessionStorage user:', sessionStorage.getItem('currentUser'));
+            
+            // Give extra time for storage synchronization
+            setTimeout(() => {
+                const hasAccess = checkPageAccess('ADMIN');
+                if (hasAccess) {
+                    console.log('✅ Admin access granted - Loading dashboard');
+                    // Load dashboard data only after access is confirmed
+                    if (typeof loadDashboardStats === 'function') {
+                        loadDashboardStats();
+                    }
+                } else {
+                    console.error('❌ Admin access denied');
+                }
+            }, 200);
+        });
+        
+        // Prevent caching for this page
+        window.addEventListener('beforeunload', function() {
+            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+                window.location.reload();
+            }
+        });
+        
+        // Disable back button functionality
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+        
+        // Fix logout button
+        document.querySelector('.btn-outline-light').onclick = function(e) {
+            e.preventDefault();
+            logout();
+        };
+    </script>
+</body>
+</html>
