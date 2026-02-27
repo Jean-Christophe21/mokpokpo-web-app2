@@ -3,20 +3,19 @@
 const API_URL = 'https://bd-mokpokokpo.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check authentication
-    const token = localStorage.getItem('token');
-    if (!token) {
-        console.warn('No token found, redirecting to login');
-        alert('Vous devez vous connecter pour accÈder ‡ cette page.');
-        window.location.href = 'commercial-login.html';
-        return;
-    }
+// Check authentication
+const token = localStorage.getItem('token');
+if (!token) {
+    alert('Vous devez vous connecter pour acc√©der √† cette page.');
+    window.location.href = 'commercial-login.html';
+    return;
+}
 
     // Check if user is commercial manager
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    if (currentUser.role !== 'GEST_COMMERCIAL') {
-        alert('AccËs rÈservÈ aux gestionnaires commerciaux.');
-        window.location.href = 'dashboard.html';
+    if (currentUser.role !== 'GEST COMMERCIAL') {
+        alert('Acc√®s r√©serv√© aux gestionnaires commerciaux.');
+        window.location.href = 'index.html';
         return;
     }
 
@@ -77,6 +76,7 @@ function initSectionNavigation() {
                     document.getElementById('endDate').value = today;
                 } else if (sectionId === 'predictions') {
                     loadSalesPredictions();
+                    loadHistoricalData();
                 }
             }
         });
@@ -98,75 +98,66 @@ async function loadDashboardStats() {
     const token = localStorage.getItem('token');
     
     try {
-        // Load products count
-        const productsResponse = await fetch(`${API_URL}/produits/`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (productsResponse.ok) {
-            const products = await productsResponse.json();
-            document.getElementById('totalProducts').textContent = products.length;
-        }
+        // Fetch all necessary data in parallel
+        const [ordersResponse, stocksResponse] = await Promise.all([
+            fetch(`${API_URL}/commandes/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API_URL}/stocks/`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
 
-        // Load pending orders
-        const ordersResponse = await fetch(`${API_URL}/commandes/`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
         if (ordersResponse.ok) {
             const orders = await ordersResponse.json();
+            
+            // 1. Pending Orders (Commandes en attente)
             const pendingOrders = orders.filter(o => o.statut === 'EN_ATTENTE');
-            const totalOrders = orders.length;
+            animateValue('pendingOrdersCount', 0, pendingOrders.length, 800);
             
-            document.getElementById('totalOrders').textContent = pendingOrders.length;
-            document.getElementById('pendingOrdersBadge').textContent = pendingOrders.length;
-            
-            // Add pulse animation if there are pending orders
-            if (pendingOrders.length > 0) {
-                document.getElementById('pendingOrdersBadge').classList.add('badge-pulse');
+            // Update sidebar badge
+            const pendingBadge = document.getElementById('pendingOrdersBadge');
+            if (pendingBadge) {
+                pendingBadge.textContent = pendingOrders.length;
+                if (pendingOrders.length > 0) pendingBadge.classList.add('badge-pulse');
+                else pendingBadge.classList.remove('badge-pulse');
             }
+
+            // 2. In Delivery (We assume 'VALIDEE' means currently being processed/delivered)
+            const inDeliveryOrders = orders.filter(o => o.statut === 'VALIDEE');
+            animateValue('inDeliveryCount', 0, inDeliveryOrders.length, 800);
+
+            // 3. Delivered Today (Livr√©es aujourd'hui)
+            // Note: Ideally we would check a 'date_livraison' field.
+            // Here we check if status is 'LIVREE' and updated/created today (approximation)
+            const today = new Date().toISOString().split('T')[0];
+            const deliveredToday = orders.filter(o => {
+                // If we tracked update date, we'd use that. For now, check if LIVREE.
+                // In a real app, you'd filter by the specific delivery timestamp.
+                return o.statut === 'LIVREE' && o.date_commande.startsWith(today); 
+            });
+            animateValue('deliveredTodayCount', 0, deliveredToday.length, 800);
         }
 
-        // Load pending reservations
-        const reservationsResponse = await fetch(`${API_URL}/reservations/`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (reservationsResponse.ok) {
-            const reservations = await reservationsResponse.json();
-            const pendingReservations = reservations.filter(r => r.statut === 'EN_ATTENTE');
+        if (stocksResponse.ok) {
+            const stocks = await stocksResponse.json();
             
-            document.getElementById('totalReservations').textContent = pendingReservations.length;
-            document.getElementById('pendingReservationsBadge').textContent = pendingReservations.length;
-            
-            // Add pulse animation if there are pending reservations
-            if (pendingReservations.length > 0) {
-                document.getElementById('pendingReservationsBadge').classList.add('badge-pulse');
-            }
-        }
+            // 4. Critical Stock (Produits critiques)
+            // Stock is critical if quantity <= alert threshold OR if expired/expiring soon (J-30)
+            const criticalStocks = stocks.filter(s => {
+                const isLowStock = s.seuil_alerte && s.quantite_stock <= s.seuil_alerte;
+                
+                let isExpiringCrucial = false;
+                if (s.date_expiration) {
+                    const alert = calculateExpirationAlert(s.date_expiration);
+                    if (alert.alertLevel >= 3) isExpiringCrucial = true; // Red Alert or Expired
+                }
 
-        // Load monthly sales
-        const ventesResponse = await fetch(`${API_URL}/ventes/`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (ventesResponse.ok) {
-            const ventes = await ventesResponse.json();
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
-            
-            const monthlySales = ventes
-                .filter(v => {
-                    const vDate = new Date(v.date_vente);
-                    return vDate.getMonth() === currentMonth && vDate.getFullYear() === currentYear;
-                })
-                .reduce((sum, v) => sum + (v.montant_total || 0), 0);
-            
-            document.getElementById('monthlySales').textContent = monthlySales.toLocaleString('fr-FR');
-            
-            // Animate number counting
-            animateValue('monthlySales', 0, monthlySales, 1000);
+                return isLowStock || isExpiringCrucial;
+            });
+
+            animateValue('criticalStockCount', 0, criticalStocks.length, 800);
         }
 
     } catch (error) {
         console.error('Error loading dashboard stats:', error);
-        showNotification('Erreur lors du chargement des statistiques', 'danger');
+        // Don't show critical error notification for stats to avoid spamming the user
     }
 }
 
@@ -231,8 +222,8 @@ async function loadRecentActivity() {
                 type: 'reservation',
                 icon: '??',
                 color: '#a855f7',
-                title: `RÈservation #${r.id_reservation}`,
-                description: `${r.statut} - QuantitÈ: ${r.quantite_reservee}`,
+                title: `R√©servation #${r.id_reservation}`,
+                description: `${r.statut} - quantit√©: ${r.quantite_reservee}`,
                 date: new Date(r.date_reservation),
                 status: r.statut
             })));
@@ -263,7 +254,7 @@ async function loadRecentActivity() {
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    <p class="text-muted mb-0">Aucune activitÈ rÈcente</p>
+                    <p class="text-muted mb-0">Aucune activit√© r√©cente</p>
                 </div>
             `;
             return;
@@ -309,7 +300,7 @@ async function loadRecentActivity() {
                     <line x1="12" y1="8" x2="12" y2="12"></line>
                     <line x1="12" y1="16" x2="12.01" y2="16"></line>
                 </svg>
-                Erreur lors du chargement de l'activitÈ rÈcente
+                Erreur lors du chargement de l'activit√© r√©cente
             </div>
         `;
     }
@@ -324,7 +315,7 @@ function formatRelativeTime(date) {
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
     
-    if (seconds < 60) return '¿ l\'instant';
+    if (seconds < 60) return '√† l\'instant';
     if (minutes < 60) return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
     if (hours < 24) return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
     if (days < 7) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
@@ -354,7 +345,7 @@ async function loadProducts() {
                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                             <line x1="7" y1="7" x2="7.01" y2="7"></line>
                         </svg>
-                        <p class="text-muted">Aucun produit trouvÈ</p>
+                        <p class="text-muted">Aucun produit trouv√©</p>
                     </div>
                 `;
                 return;
@@ -385,7 +376,7 @@ async function loadProducts() {
                                         </div>
                                     </td>
                                     <td>
-                                        <span class="text-muted fst-italic">${product.nom_scientifique || 'Non spÈcifiÈ'}</span>
+                                        <span class="text-muted fst-italic">${product.nom_scientifique || 'Non sp√©cifi√©'}</span>
                                     </td>
                                     <td class="text-center">
                                         <span class="badge bg-success px-3 py-2 fs-6">${product.prix_unitaire.toLocaleString('fr-FR')} FCFA</span>
@@ -406,7 +397,7 @@ async function loadProducts() {
                                                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
                                                 <polyline points="7 3 7 8 15 8"></polyline>
                                             </svg>
-                                            Mettre ‡ jour
+                                            Mettre √† jour
                                         </button>
                                     </td>
                                 </tr>
@@ -450,7 +441,7 @@ async function updateProductPrice(productId) {
     const button = row.querySelector('button');
     const originalButtonText = button.innerHTML;
     button.disabled = true;
-    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Mise ‡ jour...';
+    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Mise √† jour...';
     
     try {
         // Get current product data
@@ -458,7 +449,7 @@ async function updateProductPrice(productId) {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (!getResponse.ok) throw new Error('Produit non trouvÈ');
+        if (!getResponse.ok) throw new Error('Produit non trouv√©');
         
         const product = await getResponse.json();
         
@@ -476,7 +467,7 @@ async function updateProductPrice(productId) {
         });
         
         if (updateResponse.ok) {
-            showNotification(`Prix mis ‡ jour: ${newPrice.toLocaleString('fr-FR')} FCFA`, 'success');
+            showNotification(`Prix mis √† jour: ${newPrice.toLocaleString('fr-FR')} FCFA`, 'success');
             
             // Update the current price badge
             const badge = row.querySelector('.badge');
@@ -489,12 +480,12 @@ async function updateProductPrice(productId) {
             // Reload products to refresh data
             setTimeout(() => loadProducts(), 2000);
         } else {
-            throw new Error('Erreur lors de la mise ‡ jour');
+            throw new Error('Erreur lors de la mise √† jour');
         }
         
     } catch (error) {
         console.error('Error updating price:', error);
-        showNotification('Erreur lors de la mise ‡ jour du prix', 'danger');
+        showNotification('Erreur lors de la mise √† jour du prix', 'danger');
     } finally {
         // Restore button state
         button.disabled = false;
@@ -526,7 +517,7 @@ async function loadOrders() {
                             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                             <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                         </svg>
-                        <p class="text-muted">Aucune commande trouvÈe</p>
+                        <p class="text-muted">Aucune commande trouv√©e</p>
                     </div>
                 `;
                 return;
@@ -549,9 +540,9 @@ async function loadOrders() {
                 
                 const statusText = {
                     'EN_ATTENTE': 'En attente',
-                    'VALIDEE': 'ValidÈe',
-                    'ANNULEE': 'AnnulÈe',
-                    'LIVREE': 'LivrÈe'
+                    'VALIDEE': 'valid√©e',
+                    'ANNULEE': 'Annul√†e',
+                    'LIVREE': 'Livr√†e'
                 }[order.statut] || order.statut;
                 
                 const orderLines = lignes.filter(l => l.id_commande === order.id_commande);
@@ -606,7 +597,7 @@ async function loadOrders() {
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
                                                             <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                                                         </svg>
-                                                        ${orderLines.length} article(s) - ${itemsCount} unitÈ(s)
+                                                        ${orderLines.length} article(s) - ${itemsCount} unit√†(s)
                                                     </small>
                                                 </div>
                                             ` : ''}
@@ -620,6 +611,12 @@ async function loadOrders() {
                                     </div>
                                     ${order.statut === 'EN_ATTENTE' ? `
                                         <div class="d-flex gap-2 mt-3 justify-content-end">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="viewOrderDetails(${order.id_commande})">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                </svg>
+                                            </button>
                                             <button class="btn btn-success btn-sm flex-fill" onclick="updateOrderStatus(${order.id_commande}, 'VALIDEE')">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
                                                     <polyline points="20 6 9 17 4 12"></polyline>
@@ -634,7 +631,17 @@ async function loadOrders() {
                                                 Refuser
                                             </button>
                                         </div>
-                                    ` : ''}
+                                    ` : `
+                                        <div class="d-flex gap-2 mt-3 justify-content-end">
+                                            <button class="btn btn-outline-primary btn-sm w-100" onclick="viewOrderDetails(${order.id_commande})">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    <circle cx="12" cy="12" r="3"></circle>
+                                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                                </svg>
+                                                Voir les d√©tails
+                                            </button>
+                                        </div>
+                                    `}
                                 </div>
                             </div>
                         </div>
@@ -664,7 +671,7 @@ async function loadOrders() {
 async function updateOrderStatus(orderId, newStatus) {
     const token = localStorage.getItem('token');
     
-    if (!confirm(` tes-vous s˚r de vouloir ${newStatus === 'VALIDEE' ? 'accepter' : 'refuser'} cette commande ?`)) {
+    if (!confirm(`√†tes-vous s√†r de vouloir ${newStatus === 'VALIDEE' ? 'accepter' : 'refuser'} cette commande ?`)) {
         return;
     }
     
@@ -674,10 +681,88 @@ async function updateOrderStatus(orderId, newStatus) {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (!getResponse.ok) throw new Error('Commande non trouvÈe');
+        if (!getResponse.ok) throw new Error('Commande non trouv√©e');
         
         const order = await getResponse.json();
         
+        // === GESTION FEFO : D√†DUCTION DES STOCKS ===
+        if (newStatus === 'VALIDEE') {
+            // 1. R√†cup√†rer les lignes de commande et les stocks
+            const [linesResponse, stocksResponse] = await Promise.all([
+                fetch(`${API_URL}/ligne-commandes/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_URL}/stocks/`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+
+            if (!linesResponse.ok || !stocksResponse.ok) {
+                throw new Error('Erreur lors de la r√†cup√†ration des donn√©es de stock');
+            }
+
+            const allLines = await linesResponse.json();
+            const orderLines = allLines.filter(l => l.id_commande === order.id_commande);
+            const allStocks = await stocksResponse.json();
+
+            // 2. V√†rifier et d√†duire pour chaque produit
+            for (const line of orderLines) {
+                const productStocks = allStocks.filter(s => s.id_produit === line.id_produit);
+                
+                // Utilisation de la fonction FEFO impl√†ment√†e plus bas
+                const stocksToDeduct = selectStocksForSaleFEFO(productStocks, line.quantite);
+                
+                // V√†rifier si la quantit√© trouv√©e est suffisante
+                const totalFound = stocksToDeduct.reduce((acc, s) => acc + s.quantite, 0);
+                if (totalFound < line.quantite) {
+                    throw new Error(`Stock insuffisant (ou expir√†) pour le produit #${line.id_produit}. Demand√†: ${line.quantite}, Dispo: ${totalFound}`);
+                }
+
+                // Appliquer les d√†ductions
+                for (const deduction of stocksToDeduct) {
+                    // Trouver le stock d'origine pour avor les autres propri√†t√†s
+                    const originalStock = allStocks.find(s => s.id_stock === deduction.id_stock);
+                    
+                    const newQuantity = originalStock.quantite_stock - deduction.quantite;
+                    
+                    // Mise √† jour du stock via API
+                    const updateStockResponse = await fetch(`${API_URL}/stocks/${deduction.id_stock}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            ...originalStock,
+                            quantite_stock: newQuantity
+                        })
+                    });
+
+                    if (!updateStockResponse.ok) {
+                        throw new Error(`Erreur lors de la mise √† jour du stock #${deduction.id_stock}`);
+                    }
+                }
+            }
+        } else if (newStatus === 'ANNULEE' && order.statut === 'VALIDEE') {
+            const [linesRes, stocksRes] = await Promise.all([
+                fetch(`${API_URL}/ligne-commandes/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+                fetch(`${API_URL}/stocks/`, { headers: { 'Authorization': `Bearer ${token}` } })
+            ]);
+            if (linesRes.ok && stocksRes.ok) {
+                const allLines = await linesRes.json();
+                const orderLines = allLines.filter(l => l.id_commande === parseInt(orderId));
+                const allStocks = await stocksRes.json();
+                for (const line of orderLines) {
+                    const productStocks = allStocks.filter(s => s.id_produit === line.id_produit)
+                        .sort((a, b) => new Date(b.date_expiration) - new Date(a.date_expiration));
+                    if (productStocks.length > 0) {
+                        const target = productStocks[0];
+                        await fetch(`${API_URL}/stocks/${target.id_stock}`, {
+                            method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ ...target, quantite_stock: target.quantite_stock + line.quantite })
+                        });
+                    }
+                }
+            }
+        }
+        // ===========================================
+
         // Update status
         const updateResponse = await fetch(`${API_URL}/commandes/${orderId}`, {
             method: 'PUT',
@@ -692,16 +777,136 @@ async function updateOrderStatus(orderId, newStatus) {
         });
         
         if (updateResponse.ok) {
-            showNotification(`Commande ${newStatus === 'VALIDEE' ? 'acceptÈe' : 'refusÈe'}`, 'success');
+            showNotification(`Commande ${newStatus === 'VALIDEE' ? 'accept√†e' : 'refus√†e'}`, 'success');
             loadOrders();
             loadDashboardStats();
         } else {
-            throw new Error('Erreur lors de la mise ‡ jour');
+            throw new Error('Erreur lors de la mise √† jour');
         }
         
     } catch (error) {
         console.error('Error updating order:', error);
-        showNotification('Erreur lors de la mise ‡ jour de la commande', 'danger');
+        showNotification('Erreur lors de la mise √† jour de la commande', 'danger');
+    }
+}
+
+// View Order Details
+async function viewOrderDetails(orderId) {
+    const token = localStorage.getItem('token');
+    const modalContent = document.getElementById('orderDetailsContent');
+    const modalTitle = document.getElementById('orderDetailsTitle');
+    
+    // Show modal with loading state
+    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+    modalContent.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
+    modalTitle.textContent = `Commande #${orderId}`;
+    modal.show();
+
+    try {
+        const [orderRes, linesRes, productsRes] = await Promise.all([
+            fetch(`${API_URL}/commandes/${orderId}`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API_URL}/ligne-commandes/`, { headers: { 'Authorization': `Bearer ${token}` } }),
+            fetch(`${API_URL}/produits/`, { headers: { 'Authorization': `Bearer ${token}` } })
+        ]);
+
+        if (!orderRes.ok || !linesRes.ok || !productsRes.ok) throw new Error('Erreur de chargement');
+
+        const order = await orderRes.json();
+        const allLines = await linesRes.json();
+        const products = await productsRes.json();
+        
+        const orderLines = allLines.filter(l => l.id_commande === parseInt(orderId));
+
+        let html = `
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p class="text-muted mb-1">Date</p>
+                    <p class="fw-bold">${new Date(order.date_commande).toLocaleDateString('fr-FR', {
+                        day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    })}</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <p class="text-muted mb-1">Statut</p>
+                    <span class="badge ${order.statut === 'VALIDEE' ? 'bg-success' : (order.statut === 'EN_ATTENTE' ? 'bg-warning text-dark' : 'bg-secondary')}">
+                        ${order.statut}
+                    </span>
+                </div>
+            </div>
+            
+            <h6 class="fw-bold mb-3">Produits command√†s</h6>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Produit</th>
+                            <th class="text-center">quantit√©</th>
+                            <th class="text-end">Prix Unitaire</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        let totalAmount = 0;
+
+        html += orderLines.map(line => {
+            const product = products.find(p => p.id_produit === line.id_produit);
+            const lineTotal = (line.prix_unitaire || 0) * line.quantite;
+            totalAmount += lineTotal;
+
+            return `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="bg-light rounded p-2 me-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-secondary">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 text-sm">${product ? product.nom_produit : 'Produit inconnu'}</h6>
+                                <small class="text-muted">Ref: ${line.id_produit}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="text-center fw-bold">${line.quantite}</td>
+                    <td class="text-end text-muted">${(line.prix_unitaire || 0).toLocaleString()} FCFA</td>
+                    <td class="text-end fw-bold">${lineTotal.toLocaleString()} FCFA</td>
+                </tr>
+            `;
+        }).join('');
+
+        html += `
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold">Total G√†n√†ral</td>
+                            <td class="text-end fw-bold text-success fs-5">${totalAmount.toLocaleString()} FCFA</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+        
+        // Add action buttons if pending
+        if (order.statut === 'EN_ATTENTE') {
+            html += `
+                <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                    <button class="btn btn-danger" onclick="updateOrderStatus(${order.id_commande}, 'ANNULEE'); bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal')).hide();">
+                        Refuser la commande
+                    </button>
+                    <button class="btn btn-success px-4" onclick="updateOrderStatus(${order.id_commande}, 'VALIDEE'); bootstrap.Modal.getInstance(document.getElementById('orderDetailsModal')).hide();">
+                        Valider la commande
+                    </button>
+                </div>
+            `;
+        }
+
+        modalContent.innerHTML = html;
+
+    } catch (error) {
+        console.error('Error loading order details:', error);
+        modalContent.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des d√©tails de la commande.</div>';
     }
 }
 
@@ -721,7 +926,7 @@ async function loadReservations() {
             const reservations = await response.json();
             
             if (reservations.length === 0) {
-                reservationsList.innerHTML = '<div class="text-center py-5"><p class="text-muted">Aucune rÈservation trouvÈe</p></div>';
+                reservationsList.innerHTML = '<div class="text-center py-5"><p class="text-muted">Aucune R√©servation trouv√©e</p></div>';
                 return;
             }
             
@@ -735,9 +940,9 @@ async function loadReservations() {
                 
                 const statusText = {
                     'EN_ATTENTE': 'En attente',
-                    'CONFIRMEE': 'ConfirmÈe',
-                    'ANNULEE': 'AnnulÈe',
-                    'TERMINEE': 'TerminÈe'
+                    'CONFIRMEE': 'Confirm√†e',
+                    'ANNULEE': 'Annul√†e',
+                    'TERMINEE': 'Termin√†e'
                 }[reservation.statut] || reservation.statut;
                 
                 return `
@@ -745,7 +950,7 @@ async function loadReservations() {
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <div>
-                                    <h6 class="fw-bold mb-1">RÈservation #${reservation.id_reservation}</h6>
+                                    <h6 class="fw-bold mb-1">R√©servation #${reservation.id_reservation}</h6>
                                     <p class="text-muted small mb-0">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
                                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -765,7 +970,7 @@ async function loadReservations() {
                             <div class="mb-3">
                                 <p class="fw-bold mb-2">Client: <span class="text-muted fw-normal">Client #${reservation.id_client}</span></p>
                                 <p class="fw-bold mb-2">Produit: <span class="text-muted fw-normal">Produit #${reservation.id_produit}</span></p>
-                                <p class="fw-bold mb-0">QuantitÈ: <span class="text-primary">${reservation.quantite_reservee}</span></p>
+                                <p class="fw-bold mb-0">quantit√©: <span class="text-primary">${reservation.quantite_reservee}</span></p>
                             </div>
                             
                             ${reservation.statut === 'EN_ATTENTE' ? `
@@ -791,11 +996,11 @@ async function loadReservations() {
             }).join('');
             
         } else {
-            throw new Error('Erreur lors du chargement des rÈservations');
+            throw new Error('Erreur lors du chargement des R√©servations');
         }
     } catch (error) {
         console.error('Error loading reservations:', error);
-        reservationsList.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des rÈservations</div>';
+        reservationsList.innerHTML = '<div class="alert alert-danger">Erreur lors du chargement des R√©servations</div>';
     }
 }
 
@@ -803,7 +1008,7 @@ async function loadReservations() {
 async function updateReservationStatus(reservationId, newStatus) {
     const token = localStorage.getItem('token');
     
-    if (!confirm(` tes-vous s˚r de vouloir ${newStatus === 'CONFIRMEE' ? 'accepter' : 'refuser'} cette rÈservation ?`)) {
+    if (!confirm(`√†tes-vous s√†r de vouloir ${newStatus === 'CONFIRMEE' ? 'accepter' : 'refuser'} cette R√©servation ?`)) {
         return;
     }
     
@@ -813,7 +1018,7 @@ async function updateReservationStatus(reservationId, newStatus) {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         
-        if (!getResponse.ok) throw new Error('RÈservation non trouvÈe');
+        if (!getResponse.ok) throw new Error('R√©servation non trouv√©e');
         
         const reservation = await getResponse.json();
         
@@ -831,16 +1036,16 @@ async function updateReservationStatus(reservationId, newStatus) {
         });
         
         if (updateResponse.ok) {
-            showNotification(`RÈservation ${newStatus === 'CONFIRMEE' ? 'acceptÈe' : 'refusÈe'}`, 'success');
+            showNotification(`R√©servation ${newStatus === 'CONFIRMEE' ? 'accept√†e' : 'refus√†e'}`, 'success');
             loadReservations();
             loadDashboardStats();
         } else {
-            throw new Error('Erreur lors de la mise ‡ jour');
+            throw new Error('Erreur lors de la mise √† jour');
         }
         
     } catch (error) {
         console.error('Error updating reservation:', error);
-        showNotification('Erreur lors de la mise ‡ jour de la rÈservation', 'danger');
+        showNotification('Erreur lors de la mise √† jour de la R√©servation', 'danger');
     }
 }
 
@@ -852,7 +1057,7 @@ async function loadSalesStats() {
     const endDate = document.getElementById('endDate').value;
     
     if (!startDate || !endDate) {
-        showNotification('Veuillez sÈlectionner les dates', 'warning');
+        showNotification('Veuillez S√©lectionner les dates', 'warning');
         return;
     }
     
@@ -873,7 +1078,7 @@ async function loadSalesStats() {
             });
             
             if (filteredVentes.length === 0) {
-                salesStatsList.innerHTML = '<div class="text-center py-5"><p class="text-muted">Aucune vente pour cette pÈriode</p></div>';
+                salesStatsList.innerHTML = '<div class="text-center py-5"><p class="text-muted">Aucune vente pour cette p√†riode</p></div>';
                 return;
             }
             
@@ -903,7 +1108,7 @@ async function loadSalesStats() {
                         <div class="card border-0 shadow-sm">
                             <div class="card-body text-center">
                                 <h3 class="text-info mb-0">${totalQuantity}</h3>
-                                <p class="text-muted mb-0">UnitÈs vendues</p>
+                                <p class="text-muted mb-0">Unit√†s vendues</p>
                             </div>
                         </div>
                     </div>
@@ -915,7 +1120,7 @@ async function loadSalesStats() {
                             <tr>
                                 <th>ID Vente</th>
                                 <th>Date</th>
-                                <th>QuantitÈ</th>
+                                <th>quantit√©</th>
                                 <th>Montant Total</th>
                             </tr>
                         </thead>
@@ -978,7 +1183,6 @@ async function loadSalesPredictions() {
         }
         
         const data = await response.json();
-        console.log('Sales predictions data:', data);
         
         // Parse and display sales predictions beautifully
         container.innerHTML = renderSalesPredictions(data);
@@ -1159,9 +1363,202 @@ function renderSalesPredictions(data) {
     `;
 }
 
-// Logout
-function logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('currentUser');
-    window.location.href = 'commercial-login.html';
+// Load Historical Data
+async function loadHistoricalData() {
+    const token = localStorage.getItem('token');
+    const container = document.getElementById('historicalDataList');
+    container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="text-muted mt-2">Chargement des donn√©es historiques...</p></div>';
+    
+    try {
+        const response = await fetch(`${API_URL}/predictions/historical-data`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!response.ok) {
+            throw new Error('Erreur lors du chargement des donn√©es historiques');
+        }
+        
+        const data = await response.json();
+        
+        // Parse and display historical data
+        container.innerHTML = renderHistoricalData(data);
+        
+    } catch (error) {
+        console.error('Error loading historical data:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <strong>Erreur :</strong> ${error.message}
+            </div>
+            <div class="text-center py-3">
+                <button class="btn btn-primary" onclick="loadHistoricalData()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    R√©essayer
+                </button>
+            </div>
+        `;
+    }
 }
+
+// Render Historical Data with beautiful UI
+function renderHistoricalData(data) {
+    if (typeof data === 'string') {
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            return `<div class="alert alert-warning">Format de donn√©es non reconnu</div>`;
+        }
+    }
+    
+    if (Array.isArray(data)) {
+        const totalDays = data.length;
+        const totalCA = data.reduce((sum, item) => sum + (item.ca || 0), 0);
+        const avgCA = totalDays > 0 ? totalCA / totalDays : 0;
+        const maxCA = data.length > 0 ? Math.max(...data.map(item => item.ca || 0)) : 0;
+        const minCA = data.length > 0 ? Math.min(...data.map(item => item.ca || 0)) : 0;
+        
+        const bestDay = data.find(item => item.ca === maxCA) || {};
+        const worstDay = data.find(item => item.ca === minCA) || {};
+        
+        return `
+            <div class="alert alert-info mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <strong>donn√©es Historiques</strong> - Analyse des performances pass√©es pour optimiser le stock
+            </div>
+            
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <div class="card-body text-white text-center">
+                            <h3 class="fw-bold mb-0">${totalDays}</h3>
+                            <small class="opacity-75">Jours Analys√†s</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="card-body text-white text-center">
+                            <h3 class="fw-bold mb-0">${totalCA.toLocaleString('fr-FR')}</h3>
+                            <small class="opacity-75">CA Total (FCFA)</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                        <div class="card-body text-white text-center">
+                            <h3 class="fw-bold mb-0">${avgCA.toFixed(0).toLocaleString('fr-FR')}</h3>
+                            <small class="opacity-75">CA Moyen/Jour</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                        <div class="card-body text-white text-center">
+                            <h3 class="fw-bold mb-0">${avgCA > 0 ? ((maxCA - minCA) / avgCA * 100).toFixed(0) : 0}%</h3>
+                            <small class="opacity-75">Volatilit√©</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">Meilleur Jour</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted small mb-1">Date</p>
+                                    <p class="fw-bold mb-0">${bestDay.date ? new Date(bestDay.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'long', year: 'numeric'}) : '-'}</p>
+                                </div>
+                                <div class="text-end">
+                                    <p class="text-muted small mb-1">Chiffre d'Affaires</p>
+                                    <h4 class="text-success fw-bold mb-0">${maxCA.toLocaleString('fr-FR')} FCFA</h4>
+                                </div>
+                            </div                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">Jour le Plus Faible</h6>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="text-muted small mb-1">Date</p>
+                                    <p class="fw-bold mb-0">${worstDay.date ? new Date(worstDay.date).toLocaleDateString('fr-FR', {day: 'numeric', month: 'long', year: 'numeric'}) : '-'}</p>
+                                </div>
+                                <div class="text-end">
+                                    <p class="text-muted small mb-1">Chiffre d'Affaires</p>
+                                    <h4 class="text-warning fw-bold mb-0">${minCA.toLocaleString('fr-FR')} FCFA</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h6 class="fw-bold mb-0">Historique d√©taill√©</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Chiffre d'Affaires</th>
+                                    <th>Performance</th>
+                                    <th>Visualisation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.map(item => {
+                                    const percentage = maxCA > 0 ? (item.ca / maxCA) * 100 : 0;
+                                    const performanceClass = item.ca >= avgCA ? 'success' : item.ca >= avgCA * 0.5 ? 'warning' : 'danger';
+                                    const performanceText = item.ca >= avgCA ? 'Au-dessus' : item.ca >= avgCA * 0.5 ? 'Moyen' : 'En-dessous';
+                                    
+                                    return `
+                                        <tr>
+                                            <td><strong>${new Date(item.date).toLocaleDateString('fr-FR', {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'})}</strong></td>
+                                            <td><span class="badge bg-primary px-3 py-2">${item.ca.toLocaleString('fr-FR')} FCFA</span></td>
+                                            <td><span class="badge bg-${performanceClass}">${performanceText}</span></td>
+                                            <td>
+                                                <div class="progress" style="height: 25px;">
+                                                    <div class="progress-bar bg-${performanceClass}" role="progressbar" style="width: ${percentage}%">
+                                                        ${percentage.toFixed(0)}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+    
+    return `
+        <div class="alert alert-info mb-4">donn√©es Historiques - Historique complet des ventes</div>
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <pre class="mb-0">${JSON.stringify(data, null, 2)}</pre>
+            </div>
+        </div>
+    `;
+}
+

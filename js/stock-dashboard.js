@@ -3,20 +3,19 @@
 const API_URL = 'https://bd-mokpokokpo.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Check authentication
-    const token = localStorage.getItem('token');
-    if (!token) {
-        console.warn('No token found, redirecting to login');
-        alert('Vous devez vous connecter pour accÈder ‡ cette page.');
-        window.location.href = 'stock-login.html';
-        return;
-    }
+// Check authentication
+const token = localStorage.getItem('token');
+if (!token) {
+    alert('Vous devez vous connecter pour acc√©der √† cette page.');
+    window.location.href = 'stock-login.html';
+    return;
+}
 
     // Check if user is stock manager
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (currentUser.role !== 'GEST_STOCK') {
-        alert('AccËs rÈservÈ aux gestionnaires de stock.');
-        window.location.href = 'dashboard.html';
+        alert('Acc√®s r√©serv√© aux gestionnaires de stock.');
+        window.location.href = 'index.html';
         return;
     }
 
@@ -199,19 +198,29 @@ async function loadStocks() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="text-muted mb-3">
                         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
                     </svg>
-                    <p class="text-muted">Aucun stock trouvÈ</p>
+                    <p class="text-muted">Aucun stock trouv√©</p>
                 </div>
             `;
             return;
         }
         
-        // Sort stocks: alerts first, then by quantity
+        // Sort stocks: alerts first, then FEFO (First Expired First Out), then by quantity
         stocks.sort((a, b) => {
             const aIsAlert = a.seuil_alerte && a.quantite_stock <= a.seuil_alerte;
             const bIsAlert = b.seuil_alerte && b.quantite_stock <= b.seuil_alerte;
             
+            // Priority 1: Low Stock Alerts
             if (aIsAlert && !bIsAlert) return -1;
             if (!aIsAlert && bIsAlert) return 1;
+
+            // Priority 2: Expiration Date (FEFO)
+            if (a.date_expiration && b.date_expiration) {
+                return new Date(a.date_expiration) - new Date(b.date_expiration);
+            }
+            if (a.date_expiration) return -1;
+            if (b.date_expiration) return 1;
+
+            // Priority 3: Quantity (descending)
             return b.quantite_stock - a.quantite_stock;
         });
         
@@ -220,6 +229,31 @@ async function loadStocks() {
             const productName = product ? product.nom_produit : `Produit #${stock.id_produit}`;
             const productScientific = product ? product.nom_scientifique : '';
             
+            // Calculate expiration status
+            let expirationBadge = '';
+            let isExpired = false;
+            let expirationText = 'N/A';
+            
+            if (stock.date_expiration) {
+                const expirationDate = new Date(stock.date_expiration);
+                const today = new Date();
+                const diffTime = expirationDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                expirationText = expirationDate.toLocaleDateString();
+                
+                if (diffDays <= 0) {
+                    isExpired = true;
+                    expirationBadge = '<span class="badge bg-dark ms-2">Expir√© (Vente Bloqu√†e)</span>';
+                } else if (diffDays <= 30) {
+                    expirationBadge = `<span class="badge bg-danger ms-2">Expire dans ${diffDays}j</span>`;
+                } else if (diffDays <= 60) {
+                    expirationBadge = `<span class="badge bg-warning text-dark ms-2">Expire dans ${diffDays}j</span>`;
+                } else if (diffDays <= 90) {
+                    expirationBadge = `<span class="badge bg-warning text-dark bg-opacity-50 ms-2">Expire dans ${diffDays}j</span>`;
+                }
+            }
+
             // Calculate stock level percentage
             const maxStock = stock.seuil_alerte * 3 || 100;
             const stockPercentage = Math.min((stock.quantite_stock / maxStock) * 100, 100);
@@ -229,7 +263,12 @@ async function loadStocks() {
             let statusText = 'Stock Normal';
             let cardBorder = '';
             
-            if (stock.quantite_stock === 0) {
+            if (isExpired) {
+                statusColor = 'dark'; // Expired override
+                statusIcon = '?';
+                statusText = 'Lot Expir√©';
+                cardBorder = 'border-dark bg-light text-muted';
+            } else if (stock.quantite_stock === 0) {
                 statusColor = 'danger';
                 statusIcon = '?';
                 statusText = 'Rupture de Stock';
@@ -259,9 +298,9 @@ async function loadStocks() {
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div>
-                                                <h5 class="fw-bold mb-0">?? ${productName}</h5>
+                                                <h5 class="fw-bold mb-0">?? ${productName} ${expirationBadge}</h5>
                                                 ${productScientific ? `<p class="text-muted fst-italic small mb-0">${productScientific}</p>` : ''}
-                                                <p class="text-muted small mb-0">ID Stock: ${stock.id_stock}</p>
+                                                <p class="text-muted small mb-0">ID Stock: ${stock.id_stock} | Exp: ${expirationText}</p>
                                             </div>
                                         </div>
                                         <div class="mt-3">
@@ -303,7 +342,7 @@ async function loadStocks() {
                                                         <line x1="12" y1="5" x2="12" y2="19"></line>
                                                         <line x1="5" y1="12" x2="19" y2="12"></line>
                                                     </svg>
-                                                    RÈapprovisionner
+                                                    R√©approvisionner
                                                 </button>
                                             ` : ''}
                                         </div>
@@ -354,7 +393,7 @@ async function loadProductsForHarvest() {
         if (response.ok) {
             const products = await response.json();
             
-            select.innerHTML = '<option value="">SÈlectionner un produit...</option>' + 
+            select.innerHTML = '<option value="">S√©lectionner un produit...</option>' + 
                 products.map(p => `<option value="${p.id_produit}">${p.nom_produit}</option>`).join('');
         }
     } catch (error) {
@@ -382,7 +421,7 @@ function initHarvestForm() {
         }
         
         if (quantity < 1) {
-            showNotification('La quantitÈ doit Ítre supÈrieure ‡ 0', 'warning');
+            showNotification('La quantit√© doit √†tre sup√©rieure √† 0', 'warning');
             return;
         }
         
@@ -395,7 +434,7 @@ function initHarvestForm() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             
-            if (!stocksResponse.ok) throw new Error('Erreur lors de la vÈrification du stock');
+            if (!stocksResponse.ok) throw new Error('Erreur lors de la v√©rification du stock');
             
             const stocks = await stocksResponse.json();
             let stock = stocks.find(s => s.id_produit === productId);
@@ -418,11 +457,11 @@ function initHarvestForm() {
                 
                 if (!createResponse.ok) {
                     const error = await createResponse.text();
-                    throw new Error('Erreur lors de la crÈation du stock: ' + error);
+                    throw new Error('Erreur lors de la cr√©ation du stock: ' + error);
                 }
                 
                 stock = await createResponse.json();
-                showNotification(`? Stock crÈÈ avec succËs: ${quantity} unitÈs ajoutÈes`, 'success');
+                showNotification(`? Stock cr√©√© avec succ√†s: ${quantity} unit√†s ajout√©es`, 'success');
             } else {
                 // Update existing stock
                 const newQuantity = movementType === 'ENTREE' 
@@ -430,7 +469,7 @@ function initHarvestForm() {
                     : Math.max(0, stock.quantite_stock - quantity);
                 
                 if (movementType === 'SORTIE' && quantity > stock.quantite_stock) {
-                    showNotification('?? QuantitÈ insuffisante en stock', 'warning');
+                    showNotification('?? quantit√© insuffisante en stock', 'warning');
                     return;
                 }
                 
@@ -449,12 +488,12 @@ function initHarvestForm() {
                 
                 if (!updateResponse.ok) {
                     const error = await updateResponse.text();
-                    throw new Error('Erreur lors de la mise ‡ jour du stock: ' + error);
+                    throw new Error('Erreur lors de la mise √† jour du stock: ' + error);
                 }
                 
-                const movementTypeText = movementType === 'ENTREE' ? 'ajoutÈes' : 'retirÈes';
-                const newStockText = newQuantity === 0 ? ' ?? Stock ÈpuisÈ!' : ` (Stock: ${newQuantity})`;
-                showNotification(`? ${quantity} unitÈs ${movementTypeText}${newStockText}`, 'success');
+                const movementTypeText = movementType === 'ENTREE' ? 'ajout√©es' : 'retir√©es';
+                const newStockText = newQuantity === 0 ? ' ?? Stock √©puis√©!' : ` (Stock: ${newQuantity})`;
+                showNotification(`? ${quantity} unit√†s ${movementTypeText}${newStockText}`, 'success');
             }
             
             // Reset form and reload data
@@ -489,10 +528,10 @@ function loadMovements() {
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
-            L'historique dÈtaillÈ des mouvements sera disponible prochainement.
+            L'historique d√©taill√© des mouvements sera disponible prochainement.
         </div>
         <div class="text-center py-5">
-            <p class="text-muted">Utilisez la section "Enregistrer RÈcolte" pour ajouter de nouveaux mouvements de stock.</p>
+            <p class="text-muted">Utilisez la section "Enregistrer R√©colte" pour ajouter de nouveaux mouvements de stock.</p>
         </div>
     `;
 }
@@ -528,7 +567,7 @@ async function loadAlerts() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
                         <polyline points="20 6 9 17 4 12"></polyline>
                     </svg>
-                    Aucune alerte de stock bas. Tous les stocks sont ‡ des niveaux normaux !
+                    Aucune alerte de stock bas. Tous les stocks sont √† des niveaux normaux !
                 </div>
             `;
             return;
@@ -551,14 +590,14 @@ async function loadAlerts() {
                     <div class="flex-grow-1">
                         <h6 class="mb-1 fw-bold">${productName}</h6>
                         <p class="mb-0">
-                            Stock actuel: <strong>${stock.quantite_stock}</strong> unitÈs
+                            Stock actuel: <strong>${stock.quantite_stock}</strong> unit√†s
                             ${stock.quantite_stock === 0 ? ' - <strong>RUPTURE DE STOCK</strong>' : ''}
                         </p>
-                        <p class="mb-0 small">Seuil d'alerte: ${stock.seuil_alerte} unitÈs</p>
+                        <p class="mb-0 small">Seuil d'alerte: ${stock.seuil_alerte} unit√†s</p>
                     </div>
                     <button class="btn btn-outline-${urgency === 'danger' ? 'danger' : 'warning'} btn-sm" 
                             onclick="document.querySelector('[data-section=harvest]').click()">
-                        RÈapprovisionner
+                        R√©approvisionner
                     </button>
                 </div>
             `;
@@ -627,7 +666,6 @@ async function loadHistoricalData() {
         }
         
         const data = await response.json();
-        console.log('Historical data:', data);
         
         // Parse and display historical data beautifully
         container.innerHTML = renderHistoricalData(data);
@@ -765,7 +803,7 @@ function renderHistoricalData(data) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h6 class="fw-bold mb-0">Meilleur Jour</h6>
+                                    <h6 class="mb-0 fw-bold">Meilleur Jour</h6>
                                     <small class="text-muted">Performance maximale</small>
                                 </div>
                             </div>
@@ -793,7 +831,7 @@ function renderHistoricalData(data) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h6 class="fw-bold mb-0">Jour le Plus Faible</h6>
+                                    <h6 class="mb-0 fw-bold">Jour le Plus Faible</h6>
                                     <small class="text-muted">Opportunite d'amelioration</small>
                                 </div>
                             </div>

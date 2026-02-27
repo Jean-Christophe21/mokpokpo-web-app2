@@ -5,8 +5,7 @@ const API_URL = 'https://bd-mokpokokpo.onrender.com';
 const ROLE_REDIRECTS = {
     'ADMIN': 'admin.html',
     'GEST_STOCK': 'stock-dashboard.html',
-    'GEST_COMMERCIAL': 'commercial-dashboard.html',
-    'CLIENT': 'dashboard.html'
+    'GEST_COMMERCIAL': 'commercial-dashboard.html'
 };
 
 // Roles that require session storage (temporary) instead of localStorage (persistent)
@@ -30,18 +29,6 @@ const ROLE_PAGES = {
         'commercial-dashboard.html',
         'commercial-login.html',
         'index.html'
-    ],
-    'CLIENT': [
-        'dashboard.html',
-        'login.html',
-        'register.html',
-        'index.html',
-        'products.html',
-        'cart.html',
-        'checkout.html',
-        'about.html',
-        'contact.html',
-        'product-details.html'
     ]
 };
 
@@ -141,7 +128,6 @@ async function handleRoleLogin(form, expectedRole = null) {
         formData.append('password', password);
 
         try {
-            console.log('Attempting login to:', `${API_URL}/auth/login`);
             const response = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
@@ -150,17 +136,11 @@ async function handleRoleLogin(form, expectedRole = null) {
                 body: formData
             });
 
-            console.log('Login response status:', response.status);
-
             if (response.ok) {
                 const data = await response.json();
-                console.log('Login successful, saving token');
-                console.log('Login response data:', data);
                 
                 // Decode JWT to get user info
                 const decodedToken = decodeJWT(data.access_token);
-                console.log('Decoded token:', decodedToken);
-                console.log('All token keys:', Object.keys(decodedToken || {}));
                 
                 if (!decodedToken) {
                     throw new Error('Impossible de décoder le token JWT');
@@ -180,11 +160,6 @@ async function handleRoleLogin(form, expectedRole = null) {
                     prenom: decodedToken.prenom || decodedToken.first_name || decodedToken.firstname || decodedToken.given_name
                 };
                 
-                console.log('User info extracted from token:', user);
-                console.log('Raw role from token:', rawRole);
-                console.log('Normalized role:', normalizedRole);
-                console.log('Expected role:', expectedRole);
-                
                 // Validate that role exists
                 if (!user.role) {
                     console.error('❌ NO ROLE FOUND IN TOKEN! Token payload:', decodedToken);
@@ -193,7 +168,6 @@ async function handleRoleLogin(form, expectedRole = null) {
                 
                 // Check if role matches expected role (if specified)
                 if (expectedRole && user.role !== expectedRole) {
-                    console.warn(`❌ Role mismatch! Expected: ${expectedRole}, Got: ${user.role}`);
                     if (errorDiv && errorMessage) {
                         errorMessage.textContent = `Accès refusé. Cette page est réservée aux ${getRoleName(expectedRole)}.`;
                         errorDiv.classList.remove('d-none');
@@ -211,11 +185,6 @@ async function handleRoleLogin(form, expectedRole = null) {
                 // Mark that we just logged in (to handle timing issues)
                 sessionStorage.setItem('justLoggedIn', 'true');
                 
-                console.log('✅ Auth data saved successfully');
-                console.log('Storage type:', getStorageType(user.role) === sessionStorage ? 'sessionStorage' : 'localStorage');
-                console.log('Saved user:', getCurrentUser());
-                console.log('Saved token:', getToken());
-                
                 // Success animation
                 if (submitBtn) {
                     submitBtn.className = submitBtn.className.replace(/btn-primary/g, 'btn-success').replace(/btn-danger/g, 'btn-success');
@@ -225,7 +194,6 @@ async function handleRoleLogin(form, expectedRole = null) {
                 // Wait for UI animation then redirect
                 setTimeout(() => {
                     const redirectUrl = ROLE_REDIRECTS[user.role] || 'index.html';
-                    console.log('🔄 Redirecting to:', redirectUrl);
                     window.location.href = redirectUrl;
                 }, 1500);
             } else {
@@ -279,8 +247,7 @@ function getRoleName(role) {
     const roleNames = {
         'ADMIN': 'administrateurs',
         'GEST_STOCK': 'gestionnaires de stock',
-        'GEST_COMMERCIAL': 'commerciaux',
-        'CLIENT': 'clients'
+        'GEST_COMMERCIAL': 'commerciaux'
     };
     return roleNames[role] || 'utilisateurs';
 }
@@ -309,43 +276,25 @@ function initCommercialLogin() {
     }
 }
 
-// Initialize client login (allow CLIENT role only)
-function initClientLogin() {
-    const form = document.getElementById('loginForm');
-    if (form) {
-        handleRoleLogin(form, 'CLIENT');
-    }
-}
-
 // Check if user is authenticated and has correct role for current page
 function checkPageAccess(requiredRole) {
-    console.log('🔐 checkPageAccess called with requiredRole:', requiredRole);
-    
     const token = getToken();
     const currentUser = getCurrentUser();
     
-    console.log('Token found:', token ? 'Yes' : 'No');
-    console.log('Current user:', currentUser);
-    
     // Get current page
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-    console.log('Current page:', currentPage);
     
     if (!token || !currentUser) {
-        console.warn('❌ No token or user found, redirecting to login');
-        
         // Special handling: if we just logged in, wait a bit before redirecting
         // This prevents race conditions where storage isn't ready yet
         const isJustLoggedIn = sessionStorage.getItem('justLoggedIn') === 'true';
         if (isJustLoggedIn) {
-            console.log('⏳ Just logged in, waiting for storage to sync...');
             sessionStorage.removeItem('justLoggedIn');
             // Try again after a short delay
             setTimeout(() => {
                 const retryToken = getToken();
                 const retryUser = getCurrentUser();
                 if (retryToken && retryUser) {
-                    console.log('✅ Storage now available after retry');
                     // Reload the page to try again
                     window.location.reload();
                 } else {
@@ -378,7 +327,7 @@ function checkPageAccess(requiredRole) {
         return false;
     }
     
-    console.log('✅ Access granted for', currentUser.role, 'to', currentPage);
+    
     return true;
 }
 
@@ -387,14 +336,12 @@ function redirectToLogin(requiredRole, currentPage) {
     const loginPages = {
         'ADMIN': 'admin-login.html',
         'GEST_STOCK': 'stock-login.html',
-        'GEST_COMMERCIAL': 'commercial-login.html',
-        'CLIENT': 'login.html'
+        'GEST_COMMERCIAL': 'commercial-login.html'
     };
     
     // Don't redirect if already on a login page or index
     if (!currentPage.includes('login.html') && currentPage !== 'index.html' && currentPage !== 'register.html') {
-        console.log('Redirecting to:', loginPages[requiredRole] || 'login.html');
-        window.location.href = loginPages[requiredRole] || 'login.html';
+        window.location.href = loginPages[requiredRole] || 'index.html';
     }
 }
 
@@ -404,7 +351,7 @@ function verifyAccess() {
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
     
     // Allow public pages and login pages
-    const publicPages = ['index.html', 'about.html', 'contact.html', 'products.html', 'login.html', 'admin-login.html', 'stock-login.html', 'commercial-login.html', 'register.html'];
+    const publicPages = ['index.html', 'admin-login.html', 'stock-login.html', 'commercial-login.html'];
     if (publicPages.includes(currentPage)) {
         return true;
     }

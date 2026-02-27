@@ -15,24 +15,21 @@ function getAuthHeaders() {
 }
 
 function checkAuth() {
-    const token = sessionStorage.getItem('token') || localStorage.getItem('token');
-    const currentUserStr = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser');
+const token = sessionStorage.getItem('token') || localStorage.getItem('token');
+const currentUserStr = sessionStorage.getItem('currentUser') || localStorage.getItem('currentUser');
     
-    if (!token || !currentUserStr) {
-        console.warn('? No authentication found');
+if (!token || !currentUserStr) {
+    window.location.href = 'admin-login.html';
+    return false;
+}
+    
+try {
+    const currentUser = JSON.parse(currentUserStr);
+    if (currentUser.role !== 'ADMIN') {
         window.location.href = 'admin-login.html';
         return false;
     }
-    
-    try {
-        const currentUser = JSON.parse(currentUserStr);
-        if (currentUser.role !== 'ADMIN') {
-            console.warn('? Not an admin:', currentUser.role);
-            window.location.href = 'admin-login.html';
-            return false;
-        }
-        console.log('? Admin authentication verified');
-        return true;
+    return true;
     } catch (error) {
         console.error('Error parsing user data:', error);
         window.location.href = 'admin-login.html';
@@ -177,7 +174,7 @@ async function loadRecentActivity() {
         const orders = await fetch(`${API_BASE_URL}/commandes/`, { headers: getAuthHeaders() }).then(r => r.json());
         
         if (orders.length === 0) {
-            container.innerHTML = '<p class="text-center text-muted py-4">Aucune activit� r�cente</p>';
+            container.innerHTML = '<p class="text-center text-muted py-4">Aucune activité récente</p>';
             return;
         }
         
@@ -223,11 +220,11 @@ async function loadUsers() {
         const users = await fetch(`${API_BASE_URL}/utilisateurs/`, { headers: getAuthHeaders() }).then(r => r.json());
         
         if (users.length === 0) {
-            container.innerHTML = '<p class="text-center text-muted py-4">Aucun utilisateur trouv�</p>';
+            container.innerHTML = '<p class="text-center text-muted py-4">Aucun utilisateur trouvé</p>';
             return;
         }
         
-        let html = '<div class="table-responsive"><table class="table table-hover"><thead class="table-light"><tr><th>ID</th><th>Nom</th><th>Email</th><th>R�le</th><th>Actions</th></tr></thead><tbody>';
+        let html = '<div class="table-responsive"><table class="table table-hover"><thead class="table-light"><tr><th>ID</th><th>Nom</th><th>Email</th><th>Réle</th><th>Actions</th></tr></thead><tbody>';
         
         users.forEach(user => {
             const roleBadge = getRoleBadge(user.role);
@@ -259,7 +256,7 @@ async function loadUsers() {
 }
 
 function viewUser(userId) {
-    showNotification(`D�tails de l'utilisateur #${userId} (fonctionnalit� � impl�menter)`, 'info');
+    showNotification(`Détails de l'utilisateur #${userId} (fonctionnalité é implémenter)`, 'info');
 }
 
 // ===================================
@@ -270,36 +267,98 @@ async function loadProducts() {
     container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div></div>';
     
     try {
-        const products = await fetch(`${API_BASE_URL}/produits/`, { headers: getAuthHeaders() }).then(r => r.json());
+        const response = await fetch(`${API_BASE_URL}/produits/`, { headers: getAuthHeaders() });
+        
+        if (!response.ok) {
+            throw new Error(`Erreur HTTP: ${response.status}`);
+        }
+        
+        const products = await response.json();
         
         if (products.length === 0) {
-            container.innerHTML = '<p class="text-center text-muted py-4">Aucun produit trouv�</p>';
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted mb-3">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                    </svg>
+                    <p class="text-muted">Aucun produit dans le catalogue</p>
+                    <button class="btn btn-primary mt-2" onclick="showAddProductModal()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        Ajouter le premier produit
+                    </button>
+                </div>
+            `;
             return;
         }
         
-        let html = '<div class="row g-3">';
+        let html = '<div class="row g-4">';
         
         products.forEach(product => {
+            // Catégorie couleurs
+            const typeColors = {
+                'Aromatique': 'success',
+                'Médicinale': 'info',
+                'Superaliment': 'warning',
+                'Épice': 'danger'
+            };
+            const badgeColor = typeColors[product.type_produit] || 'secondary';
+            
             html += `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border product-card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="product-avatar">??</div>
-                                <span class="badge bg-success">${product.type_produit || 'N/A'}</span>
+                    <div class="card h-100 border-0 shadow-sm product-card">
+                        ${product.url_image ? `
+                            <div style="height: 200px; overflow: hidden; border-radius: 0.5rem 0.5rem 0 0;">
+                                <img src="${product.url_image}" 
+                                     alt="${product.nom_produit}" 
+                                     class="w-100 h-100 object-fit-cover"
+                                     onerror="this.parentElement.innerHTML='<div class=\\'d-flex align-items-center justify-content-center h-100 bg-light\\'><svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'48\\' height=\\'48\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><path d=\\'M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z\\'/><path d=\\'M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12\\'/></svg></div>'">
                             </div>
-                            <h5 class="fw-bold mb-2">${product.nom_produit}</h5>
-                            <p class="text-muted small mb-3">${product.description || 'Aucune description'}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="h4 text-primary fw-bold mb-0">${Number(product.prix_unitaire).toLocaleString('fr-BJ')} FCFA</span>
+                        ` : `
+                            <div class="d-flex align-items-center justify-content-center bg-light" style="height: 200px; border-radius: 0.5rem 0.5rem 0 0;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="text-muted">
+                                    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10 Z"/>
+                                    <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+                                </svg>
+                            </div>
+                        `}
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h5 class="fw-bold mb-0">${product.nom_produit}</h5>
+                                <span class="badge bg-${badgeColor}">${product.type_produit || 'Autre'}</span>
+                            </div>
+                            <p class="text-muted small mb-3" style="min-height: 40px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                ${product.description || 'Aucune description disponible'}
+                            </p>
+                            ${product.usages ? `
+                                <div class="mb-3">
+                                    <small class="text-muted d-block mb-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                        </svg>
+                                        Usages:
+                                    </small>
+                                    <small class="text-muted">${product.usages}</small>
+                                </div>
+                            ` : ''}
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
+                                <div>
+                                    <small class="text-muted d-block">Prix unitaire</small>
+                                    <span class="h4 text-primary fw-bold mb-0">${Number(product.prix_unitaire).toLocaleString('fr-FR')} FCFA</span>
+                                </div>
                                 <div class="btn-group btn-group-sm">
-                                    <button class="btn btn-outline-primary" onclick="editProduct(${product.id_produit})">
+                                    <button class="btn btn-outline-primary" onclick="editProduct(${product.id_produit})" title="Modifier">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                                             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                                         </svg>
                                     </button>
-                                    <button class="btn btn-outline-danger" onclick="deleteProduct(${product.id_produit})">
+                                    <button class="btn btn-outline-danger" onclick="deleteProduct(${product.id_produit}, '${product.nom_produit.replace(/'/g, "\\'")}')" title="Supprimer">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <polyline points="3 6 5 6 21 6"></polyline>
                                             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -317,21 +376,43 @@ async function loadProducts() {
         container.innerHTML = html;
         
     } catch (error) {
-        console.error('Erreur:', error);
-        container.innerHTML = '<p class="text-center text-danger py-4">Erreur de chargement</p>';
+        console.error('Erreur lors du chargement des produits:', error);
+        container.innerHTML = `
+            <div class="alert alert-danger" role="alert">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <strong>Erreur de chargement:</strong> ${error.message}
+            </div>
+            <div class="text-center">
+                <button class="btn btn-primary" onclick="loadProducts()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                        <polyline points="23 4 23 10 17 10"></polyline>
+                        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                    Réessayer
+                </button>
+            </div>
+        `;
     }
 }
 
 function showAddProductModal() {
-    showNotification('Ajout de produit (modal � impl�menter)', 'info');
+    showNotification('Ajout de produit (modal é implémenter)', 'info');
 }
 
 function editProduct(productId) {
-    showNotification(`�dition du produit #${productId}`, 'info');
+    showNotification(`édition du produit #${productId}`, 'info');
 }
 
-async function deleteProduct(productId) {
-    if (!confirm('�tes-vous s�r de vouloir supprimer ce produit ?')) return;
+async function deleteProduct(productId, productName = '') {
+    const confirmMessage = productName 
+        ? `Êtes-vous sûr de vouloir supprimer le produit "${productName}" ?\n\nCette action est irréversible.`
+        : 'Êtes-vous sûr de vouloir supprimer ce produit ?\n\nCette action est irréversible.';
+    
+    if (!confirm(confirmMessage)) return;
     
     try {
         const response = await fetch(`${API_BASE_URL}/produits/${productId}`, {
@@ -340,14 +421,15 @@ async function deleteProduct(productId) {
         });
         
         if (response.ok) {
-            showNotification('Produit supprim� avec succ�s', 'success');
+            showNotification(`Produit ${productName ? '"' + productName + '"' : '#' + productId} supprimé avec succès`, 'success');
             loadProducts();
         } else {
-            throw new Error('Erreur lors de la suppression');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.detail || 'Erreur lors de la suppression');
         }
     } catch (error) {
-        console.error('Erreur:', error);
-        showNotification('Erreur lors de la suppression', 'danger');
+        console.error('Erreur lors de la suppression:', error);
+        showNotification('Erreur: ' + error.message, 'danger');
     }
 }
 
@@ -362,7 +444,7 @@ async function loadStocks() {
         const stocks = await fetch(`${API_BASE_URL}/stocks/`, { headers: getAuthHeaders() }).then(r => r.json());
         
         if (stocks.length === 0) {
-            container.innerHTML = '<p class="text-center text-muted py-4">Aucun stock trouv�</p>';
+            container.innerHTML = '<p class="text-center text-muted py-4">Aucun stock trouvé</p>';
             return;
         }
         
@@ -443,7 +525,7 @@ async function loadOrders() {
         const orders = await fetch(`${API_BASE_URL}/commandes/`, { headers: getAuthHeaders() }).then(r => r.json());
         
         if (orders.length === 0) {
-            container.innerHTML = '<p class="text-center text-muted py-4">Aucune commande trouv�e</p>';
+            container.innerHTML = '<p class="text-center text-muted py-4">Aucune commande trouvée</p>';
             return;
         }
         
@@ -473,7 +555,7 @@ async function loadOrders() {
                         </div>
                         <div class="text-end">
                             <p class="h5 text-primary fw-bold mb-1">${order.montant_total || 0} FCFA</p>
-                            <button class="btn btn-sm btn-outline-primary" onclick="viewOrder(${order.id_commande})">D�tails</button>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewOrder(${order.id_commande})">Détails</button>
                         </div>
                     </div>
                 </div>
@@ -490,7 +572,7 @@ async function loadOrders() {
 }
 
 function viewOrder(orderId) {
-    showNotification(`D�tails de la commande #${orderId}`, 'info');
+    showNotification(`Détails de la commande #${orderId}`, 'info');
 }
 
 // ===================================
@@ -558,12 +640,12 @@ async function loadAlerts() {
 function getStatusBadge(status) {
     const badges = {
         'EN_ATTENTE': '<span class="badge bg-warning text-dark">En attente</span>',
-        'ACCEPTEE': '<span class="badge bg-info">Accept�e</span>',
-        'EN_PREPARATION': '<span class="badge bg-primary">En pr�paration</span>',
-        'EXPEDIEE': '<span class="badge bg-primary">Exp�di�e</span>',
-        'LIVREE': '<span class="badge bg-success">Livr�e</span>',
-        'ANNULEE': '<span class="badge bg-danger">Annul�e</span>',
-        'REFUSEE': '<span class="badge bg-danger">Refus�e</span>'
+        'ACCEPTEE': '<span class="badge bg-info">Acceptée</span>',
+        'EN_PREPARATION': '<span class="badge bg-primary">En préparation</span>',
+        'EXPEDIEE': '<span class="badge bg-primary">Expédiée</span>',
+        'LIVREE': '<span class="badge bg-success">Livrée</span>',
+        'ANNULEE': '<span class="badge bg-danger">Annulée</span>',
+        'REFUSEE': '<span class="badge bg-danger">Refusée</span>'
     };
     return badges[status] || '<span class="badge bg-secondary">' + status + '</span>';
 }
@@ -601,7 +683,7 @@ function showNotification(message, type = 'info') {
 // Load Sales Predictions
 async function loadSalesPredictions() {
     const container = document.getElementById('salesPredictionsList');
-    container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="text-muted mt-2">Chargement des pr�dictions de ventes...</p></div>';
+    container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="text-muted mt-2">Chargement des prédictions de ventes...</p></div>';
     
     try {
         const response = await fetch(`${API_BASE_URL}/predictions/sales`, {
@@ -609,11 +691,19 @@ async function loadSalesPredictions() {
         });
         
         if (!response.ok) {
-            throw new Error('Erreur lors du chargement des pr�dictions');
+            throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
-        console.log('Sales predictions data:', data);
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        // L'API retourne du texte selon la documentation
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            // Si c'est du texte brut (string)
+            data = await response.text();
+        }
         
         // Parse and display sales predictions beautifully
         container.innerHTML = renderSalesPredictions(data);
@@ -621,13 +711,19 @@ async function loadSalesPredictions() {
     } catch (error) {
         console.error('Error loading sales predictions:', error);
         container.innerHTML = `
-            <div class="alert alert-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <strong>Erreur :</strong> ${error.message}
+            <div class="alert alert-danger mb-4">
+                <div class="d-flex align-items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-3 flex-shrink-0">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <div>
+                        <strong>Erreur de chargement des prédictions</strong>
+                        <p class="mb-0 mt-1">${error.message}</p>
+                        <small class="text-muted">Vérifiez que le service de prédictions est disponible et que vous êtes authentifié.</small>
+                    </div>
+                </div>
             </div>
             <div class="text-center py-3">
                 <button class="btn btn-primary" onclick="loadSalesPredictions()">
@@ -635,7 +731,7 @@ async function loadSalesPredictions() {
                         <polyline points="23 4 23 10 17 10"></polyline>
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                     </svg>
-                    R�essayer
+                    Réessayer
                 </button>
             </div>
         `;
@@ -644,21 +740,24 @@ async function loadSalesPredictions() {
 
 // Render Sales Predictions with beautiful UI
 function renderSalesPredictions(data) {
-    // If data is a string, try to parse it
+    // Si c'est une string, on essaie de l'afficher joliment
     if (typeof data === 'string') {
+        // Essayer de parser en JSON d'abord
         try {
-            data = JSON.parse(data);
+            const parsedData = JSON.parse(data);
+            return renderSalesPredictions(parsedData); // Récursif avec les données parsées
         } catch (e) {
-            return `<div class="alert alert-warning">Format de donnees non reconnu</div>`;
+            // Si ce n'est pas du JSON, c'est probablement du texte généré par l'IA
+            return renderTextPrediction(data);
         }
     }
     
-    // Check if it has the expected structure
+    // Si c'est un objet avec la structure attendue
     if (data && typeof data === 'object') {
-        const forecast = data.forecast_7_days || 0;
-        const trends = data.trends || 'Aucune tendance disponible';
-        const recommendations = data.recommendations || [];
-        const analysisText = data.analysis_text || 'Aucune analyse disponible';
+        const forecast = data.forecast_7_days || data.prevision_7_jours || 0;
+        const trends = data.trends || data.tendances || 'Aucune tendance disponible';
+        const recommendations = data.recommendations || data.recommandations || [];
+        const analysisText = data.analysis_text || data.analyse || data.texte || 'Aucune analyse disponible';
         
         return `
             <div class="alert alert-info mb-4">
@@ -667,7 +766,7 @@ function renderSalesPredictions(data) {
                     <line x1="12" y1="16" x2="12" y2="12"></line>
                     <line x1="12" y1="8" x2="12.01" y2="8"></line>
                 </svg>
-                <strong>Predictions IA</strong> - Analyse predictive basee sur l'historique des ventes et les tendances du marche
+                <strong>Prédictions IA</strong> - Analyse prédictive basée sur l'historique des ventes et les tendances du marché
             </div>
             
             <!-- Forecast Card -->
@@ -683,8 +782,8 @@ function renderSalesPredictions(data) {
                                     </svg>
                                 </div>
                                 <div>
-                                    <h6 class="mb-1 opacity-75">Prevision pour les 7 Prochains Jours</h6>
-                                    <h2 class="fw-bold mb-0">${forecast.toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} FCFA</h2>
+                                    <h6 class="mb-1 opacity-75">Prévision pour les 7 Prochains Jours</h6>
+                                    <h2 class="fw-bold mb-0">${Number(forecast).toLocaleString('fr-FR', {minimumFractionDigits: 2, maximumFractionDigits: 2})} FCFA</h2>
                                 </div>
                             </div>
                             <p class="mb-0 opacity-90">
@@ -692,12 +791,12 @@ function renderSalesPredictions(data) {
                                     <circle cx="12" cy="12" r="10"></circle>
                                     <polyline points="12 6 12 12 16 14"></polyline>
                                 </svg>
-                                Chiffre d'affaires estime base sur les tendances actuelles
+                                Chiffre d'affaires estimé basé sur les tendances actuelles
                             </p>
                         </div>
                         <div class="col-md-4 text-center">
                             <div style="width: 120px; height: 120px; margin: 0 auto; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div style="font-size: 2.5rem;">??</div>
+                                <div style="font-size: 2.5rem;">📈</div>
                                 <small class="opacity-75 mt-2">7 Jours</small>
                             </div>
                         </div>
@@ -717,13 +816,13 @@ function renderSalesPredictions(data) {
                 </div>
                 <div class="card-body">
                     <div class="alert alert-light border-start border-4 border-primary">
-                        <p class="mb-0" style="line-height: 1.8;">${trends}</p>
+                        <p class="mb-0" style="line-height: 1.8; white-space: pre-wrap;">${trends}</p>
                     </div>
                 </div>
             </div>
             
             <!-- Recommendations -->
-            ${recommendations.length > 0 ? `
+            ${Array.isArray(recommendations) && recommendations.length > 0 ? `
                 <div class="card border-0 shadow-sm mb-4">
                     <div class="card-header bg-white border-0 py-3">
                         <h6 class="fw-bold mb-0">
@@ -731,7 +830,7 @@ function renderSalesPredictions(data) {
                                 <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
                                 <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
                             </svg>
-                            Recommandations Strategiques
+                            Recommandations Stratégiques
                         </h6>
                     </div>
                     <div class="card-body">
@@ -764,19 +863,30 @@ function renderSalesPredictions(data) {
                             <line x1="16" y1="17" x2="8" y2="17"></line>
                             <polyline points="10 9 9 9 8 9"></polyline>
                         </svg>
-                        Rapport d'Analyse Detaille
+                        Rapport d'Analyse Détaillé
                     </h6>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-light border-start border-4 border-info">
-                        <p class="mb-0" style="line-height: 1.8;">${analysisText}</p>
+                        <p class="mb-0" style="line-height: 1.8; white-space: pre-wrap;">${analysisText}</p>
                     </div>
                 </div>
             </div>
         `;
     }
     
-    // If it's not the expected format, display as formatted text
+    // Format par défaut si rien d'autre ne fonctionne
+    return renderTextPrediction(JSON.stringify(data, null, 2));
+}
+
+// Fonction pour afficher une prédiction sous forme de texte
+function renderTextPrediction(text) {
+    // Nettoyer le texte
+    text = text.trim();
+    
+    // Extraire les sections si possible
+    const sections = extractSections(text);
+    
     return `
         <div class="alert alert-info mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
@@ -784,20 +894,84 @@ function renderSalesPredictions(data) {
                 <line x1="12" y1="16" x2="12" y2="12"></line>
                 <line x1="12" y1="8" x2="12.01" y2="8"></line>
             </svg>
-            <strong>Predictions de Ventes</strong> - Analyse predictive generee par IA
+            <strong>Prédictions de Ventes IA</strong> - Analyse prédictive générée par intelligence artificielle
         </div>
-        <div class="card border-0 shadow-sm">
+        
+        <div class="card border-0 shadow-sm mb-4">
             <div class="card-body">
-                <pre class="mb-0" style="white-space: pre-wrap; word-wrap: break-word;">${JSON.stringify(data, null, 2)}</pre>
+                <div class="prediction-text-content" style="line-height: 1.8; white-space: pre-wrap; font-size: 1.05rem;">
+                    ${formatPredictionText(text, sections)}
+                </div>
             </div>
         </div>
+        
+        <div class="alert alert-light border-start border-4 border-primary">
+            <small class="text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                Cette analyse a été générée automatiquement en combinant le modèle ML RandomForest et l'IA Gemini pour des recommandations intelligentes.
+            </small>
+        </div>
     `;
+}
+
+// Extraire les sections d'un texte
+function extractSections(text) {
+    const sections = {
+        forecast: null,
+        trends: null,
+        recommendations: [],
+        analysis: text
+    };
+    
+    // Rechercher des motifs courants dans le texte
+    const forecastMatch = text.match(/prévision[s]?\s*:?\s*([0-9,.\s]+)\s*(FCFA|CFA|F|francs?)/i);
+    if (forecastMatch) {
+        sections.forecast = forecastMatch[1].trim();
+    }
+    
+    // Rechercher les tendances
+    const trendsMatch = text.match(/tendance[s]?\s*:?\s*([^\n.]+)/i);
+    if (trendsMatch) {
+        sections.trends = trendsMatch[1].trim();
+    }
+    
+    // Rechercher les recommandations (lignes commençant par - ou numéros)
+    const lines = text.split('\n');
+    lines.forEach(line => {
+        if (line.match(/^[\s]*[-•*]\s*(.+)/) || line.match(/^[\s]*\d+[.)]\s*(.+)/)) {
+            sections.recommendations.push(line.trim());
+        }
+    });
+    
+    return sections;
+}
+
+// Formatter le texte de prédiction
+function formatPredictionText(text, sections) {
+    let formatted = text;
+    
+    // Mettre en gras les mots-clés importants
+    const keywords = ['prévision', 'recommandation', 'tendance', 'analyse', 'FCFA', 'augmentation', 'diminution', 'stable'];
+    keywords.forEach(keyword => {
+        const regex = new RegExp(`\\b(${keyword}[s]?)\\b`, 'gi');
+        formatted = formatted.replace(regex, '<strong>$1</strong>');
+    });
+    
+    // Ajouter des icônes pour les listes
+    formatted = formatted.replace(/^[\s]*[-•*]\s*/gm, '&nbsp;&nbsp;📌 ');
+    formatted = formatted.replace(/^[\s]*(\d+)[.)]\s*/gm, '&nbsp;&nbsp;<span class="badge bg-primary rounded-circle" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;">$1</span> ');
+    
+    return formatted;
 }
 
 // Load Historical Data
 async function loadHistoricalData() {
     const container = document.getElementById('historicalDataList');
-    container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="text-muted mt-2">Chargement des donn�es historiques...</p></div>';
+    container.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="text-muted mt-2">Chargement des données historiques...</p></div>';
     
     try {
         const response = await fetch(`${API_BASE_URL}/predictions/historical-data`, {
@@ -805,11 +979,18 @@ async function loadHistoricalData() {
         });
         
         if (!response.ok) {
-            throw new Error('Erreur lors du chargement des donn�es historiques');
+            throw new Error(`Erreur HTTP ${response.status}: ${response.statusText}`);
         }
         
-        const data = await response.json();
-        console.log('Historical data:', data);
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        // Gérer différents types de réponses
+        if (contentType && contentType.includes('application/json')) {
+            data = await response.json();
+        } else {
+            data = await response.text();
+        }
         
         // Parse and display historical data beautifully
         container.innerHTML = renderHistoricalData(data);
@@ -817,13 +998,19 @@ async function loadHistoricalData() {
     } catch (error) {
         console.error('Error loading historical data:', error);
         container.innerHTML = `
-            <div class="alert alert-danger">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <strong>Erreur :</strong> ${error.message}
+            <div class="alert alert-danger mb-4">
+                <div class="d-flex align-items-start">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-3 flex-shrink-0">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <div>
+                        <strong>Erreur de chargement des données historiques</strong>
+                        <p class="mb-0 mt-1">${error.message}</p>
+                        <small class="text-muted">Vérifiez que le service est disponible et que vous êtes authentifié.</small>
+                    </div>
+                </div>
             </div>
             <div class="text-center py-3">
                 <button class="btn btn-primary" onclick="loadHistoricalData()">
@@ -831,7 +1018,7 @@ async function loadHistoricalData() {
                         <polyline points="23 4 23 10 17 10"></polyline>
                         <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                     </svg>
-                    R�essayer
+                    Réessayer
                 </button>
             </div>
         `;

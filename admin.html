@@ -508,6 +508,60 @@
         </div>
     </section>
 
+    <!-- Add Product Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold">Nouveau Produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="addProductForm" onsubmit="submitAddProduct(event)">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="productName" class="form-label">Nom du produit</label>
+                                <input type="text" class="form-control" id="productName" required placeholder="Ex: Maïs Grain">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productType" class="form-label">Type de produit</label>
+                                <select class="form-select" id="productType" required>
+                                    <option value="" selected disabled>Sélectionner un type</option>
+                                    <option value="CEREALES">Céréales</option>
+                                    <option value="TUBERCULES">Tubercules</option>
+                                    <option value="LEGUMES">Légumes</option>
+                                    <option value="FRUITS">Fruits</option>
+                                    <option value="AUTRE">Autre</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="productDescription" class="form-label">Description</label>
+                                <textarea class="form-control" id="productDescription" rows="3" required placeholder="Description détaillée du produit..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="productUsages" class="form-label">Usages</label>
+                                <textarea class="form-control" id="productUsages" rows="2" required placeholder="Ex: Alimentation humaine, animale..."></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productPrice" class="form-label">Prix Unitaire (FCFA)</label>
+                                <input type="number" class="form-control" id="productPrice" min="0" required placeholder="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="productImage" class="form-label">URL Image</label>
+                                <input type="url" class="form-control" id="productImage" placeholder="https://example.com/image.jpg">
+                                <small class="text-muted">Lien direct vers l'image du produit</small>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary px-4">Créer le produit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="text-center text-lg-start mt-5">
         <div class="container py-5">
@@ -548,9 +602,6 @@
                     <h5 class="fw-bold mb-3">Navigation</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2"><a href="index.html" class="text-decoration-none text-muted">Accueil</a></li>
-                        <li class="mb-2"><a href="products.html" class="text-decoration-none text-muted">Catalogue</a></li>
-                        <li class="mb-2"><a href="about.html" class="text-decoration-none text-muted">À propos</a></li>
-                        <li class="mb-2"><a href="contact.html" class="text-decoration-none text-muted">Contact</a></li>
                     </ul>
                 </div>
 
@@ -609,21 +660,14 @@
     <script>
         // Wait for page to fully load and storage to be ready
         window.addEventListener('load', () => {
-            console.log('🔍 Admin page loaded, checking access...');
-            console.log('SessionStorage token:', sessionStorage.getItem('token') ? 'Present' : 'Missing');
-            console.log('SessionStorage user:', sessionStorage.getItem('currentUser'));
-            
             // Give extra time for storage synchronization
             setTimeout(() => {
                 const hasAccess = checkPageAccess('ADMIN');
                 if (hasAccess) {
-                    console.log('✅ Admin access granted - Loading dashboard');
                     // Load dashboard data only after access is confirmed
                     if (typeof loadDashboardStats === 'function') {
                         loadDashboardStats();
                     }
-                } else {
-                    console.error('❌ Admin access denied');
                 }
             }, 200);
         });

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="UTF-8">
     <title>Gestionnaire Commercial - Mokpokpo</title>
     <link rel="stylesheet" href="css/css_bootstrap/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -191,8 +191,8 @@
                         <div class="row g-4 mb-4">
                             <!-- Stats Cards -->
                             <div class="col-md-3">
-                                <div class="stat-card" style="border-top: 4px solid #3b82f6;">
-                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #3b82f6;">
+                                <div class="stat-card" style="border-top: 4px solid #f59e0b;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #f59e0b;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                                             <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
@@ -200,24 +200,25 @@
                                     </div>
                                     <div class="stat-card-content">
                                         <p class="stat-card-label">Commandes</p>
-                                        <h3 class="stat-card-value" id="totalOrders">0</h3>
+                                        <h3 class="stat-card-value" id="pendingOrdersCount">0</h3>
                                         <p class="stat-card-description">En attente</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="stat-card" style="border-top: 4px solid #a855f7;">
-                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #e9d5ff, #d8b4fe); color: #a855f7;">
+                                <div class="stat-card" style="border-top: 4px solid #3b82f6;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #3b82f6;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                                            <rect x="1" y="3" width="15" height="13"></rect>
+                                            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                            <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                                            <circle cx="18.5" cy="18.5" r="2.5"></circle>
                                         </svg>
                                     </div>
                                     <div class="stat-card-content">
-                                        <p class="stat-card-label">Réservations</p>
-                                        <h3 class="stat-card-value" id="totalReservations">0</h3>
-                                        <p class="stat-card-description">En attente</p>
+                                        <p class="stat-card-label">Livraisons</p>
+                                        <h3 class="stat-card-value" id="inDeliveryCount">0</h3>
+                                        <p class="stat-card-description">En cours</p>
                                     </div>
                                 </div>
                             </div>
@@ -225,29 +226,30 @@
                                 <div class="stat-card" style="border-top: 4px solid #10b981;">
                                     <div class="stat-card-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #10b981;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                         </svg>
                                     </div>
                                     <div class="stat-card-content">
-                                        <p class="stat-card-label">CA du Mois</p>
-                                        <h3 class="stat-card-value"><span id="monthlySales">0</span> FCFA</h3>
-                                        <p class="stat-card-description">Ventes</p>
+                                        <p class="stat-card-label">Succès</p>
+                                        <h3 class="stat-card-value" id="deliveredTodayCount">0</h3>
+                                        <p class="stat-card-description">Livrées aujourd'hui</p>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-3">
-                                <div class="stat-card" style="border-top: 4px solid #f59e0b;">
-                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #f59e0b;">
+                                <div class="stat-card" style="border-top: 4px solid #dc2626;">
+                                    <div class="stat-card-icon" style="background: linear-gradient(135deg, #fecaca, #fca5a5); color: #dc2626;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
                                         </svg>
                                     </div>
                                     <div class="stat-card-content">
-                                        <p class="stat-card-label">Produits</p>
-                                        <h3 class="stat-card-value" id="totalProducts">0</h3>
-                                        <p class="stat-card-description">Au catalogue</p>
+                                        <p class="stat-card-label">Stock</p>
+                                        <h3 class="stat-card-value" id="criticalStockCount">0</h3>
+                                        <p class="stat-card-description">Produits critiques</p>
                                     </div>
                                 </div>
                             </div>
@@ -322,6 +324,23 @@
                         </div>
                     </div>
 
+                    <!-- Setup Modal for Order Details -->
+                    <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg rounded-4">
+                                <div class="modal-header border-0 pb-0">
+                                    <h5 class="modal-title fw-bold" id="orderDetailsTitle">Détails de la commande</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <div id="orderDetailsContent">
+                                        <!-- Content loaded dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Reservations Section -->
                     <div id="reservations-section" class="dashboard-section d-none">
                         <div class="card border-0 shadow-sm rounded-4">
@@ -353,7 +372,9 @@
                     <div id="sales-section" class="dashboard-section d-none">
                         <div class="card border-0 shadow-sm rounded-4">
                             <div class="card-header bg-white py-3">
-                                <h5 class="fw-bold mb-0">Statistiques de Ventes</h5>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="fw-bold mb-0">Statistiques de Ventes</h5>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3 mb-4">
@@ -387,30 +408,67 @@
 
                     <!-- Predictions Section -->
                     <div id="predictions-section" class="dashboard-section d-none">
-                        <div class="card border-0 shadow-sm rounded-4">
-                            <div class="card-header bg-white py-3">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <h5 class="fw-bold mb-0">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
-                                            <line x1="12" y1="1" x2="12" y2="23"></line>
-                                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                                        </svg>
-                                        Predictions des Ventes (IA)
-                                    </h5>
-                                    <button class="btn btn-primary btn-sm" onclick="loadSalesPredictions()">
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
-                                            <polyline points="23 4 23 10 17 10"></polyline>
-                                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-                                        </svg>
-                                        Actualiser
-                                    </button>
+                        <div class="row g-4">
+                            <!-- Sales Predictions -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm rounded-4">
+                                    <div class="card-header bg-white py-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="fw-bold mb-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                                    <line x1="12" y1="1" x2="12" y2="23"></line>
+                                                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                                                </svg>
+                                                Prédictions des Ventes (IA)
+                                            </h5>
+                                            <button class="btn btn-primary btn-sm" onclick="loadSalesPredictions()">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                                </svg>
+                                                Actualiser
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="salesPredictionsList">
+                                            <div class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Chargement...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="card-body">
-                                <div id="salesPredictionsList">
-                                    <div class="text-center py-5">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Chargement...</span>
+
+                            <!-- Historical Data -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm rounded-4">
+                                    <div class="card-header bg-white py-3">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="fw-bold mb-0">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-2">
+                                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                                </svg>
+                                                Données Historiques
+                                            </h5>
+                                            <button class="btn btn-primary btn-sm" onclick="loadHistoricalData()">
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="me-1">
+                                                    <polyline points="23 4 23 10 17 10"></polyline>
+                                                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                                                </svg>
+                                                Actualiser
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="historicalDataList">
+                                            <div class="text-center py-5">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Chargement...</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -442,7 +500,7 @@
         </div>
         <div class="border-top">
             <div class="container py-3">
-                <p class="text-center text-muted mb-0">@ 2025 Mokpokpo. Tous droits réservés.</p>
+                <p class="text-center text-muted mb-0">© 2025 Mokpokpo. Tous droits réservés.</p>
             </div>
         </div>
     </footer>
